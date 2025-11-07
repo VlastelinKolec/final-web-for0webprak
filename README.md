@@ -50,15 +50,41 @@ npm run dev
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
-## What technologies are used for this project?
+## Features
 
-This project is built with:
+- История отчетов вместо «История анализов»
+	- Таблица с итоговой оценкой, уверенностью и % соответствия
+	- Переход к детальному отчету (`/report/:id`)
+- Отчет кандидата
+	- Виджет ключевых метрик: Итоговая оценка, Уверенность, Соответствие
+	- Карта софт-скиллов (Chart.js Radar)
+- Вакансии (`/vacancies`)
+	- Создание вакансии (название, департамент, статус, описание, требования)
+	- Профили кандидатов: добавление, смена этапа, удаление
+	- Фильтры: статус вакансии, этап кандидата, минимальный рейтинг, поиск
+	- Переход к отчету из карточки кандидата (бейдж «Отчет»)
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
+## Tech stack
+
+- Vite + TypeScript + React 18
+- React Router 6
+- @tanstack/react-query
+- shadcn/ui + Radix UI
 - Tailwind CSS
+- chart.js + react-chartjs-2
+
+## Run locally (Windows PowerShell)
+
+```powershell
+npm install
+npm run dev
+```
+
+Сборка (development mode):
+
+```powershell
+npm run build:dev
+```
 
 ## How can I deploy this project?
 
@@ -71,3 +97,22 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+## Git: рекомендации
+
+- Если видите ошибку при push вида `Permission denied` или `403` на `https://github.com/<owner>/<repo>.git`:
+	- Убедитесь, что у вас есть права на репозиторий, либо пушьте в свой форк (`origin`).
+	- Проверьте remote-ы:
+		- `upstream` — обычно оригинальный репозиторий (только fetch/pull)
+		- `origin` — ваш форк (push)
+	- Пример перенастройки remotes:
+		```powershell
+		git remote -v
+		git remote set-url origin https://github.com/<ВАШ_АККАУНТ>/<РЕПО>.git
+		git push -u origin main
+		```
+
+- Если VS Code показывает «Cannot find type definition file …», а сборка проходит:
+	- Перезапустите TypeScript сервер: Command Palette → “TypeScript: Restart TS server”
+	- Перезагрузите окно: Command Palette → “Developer: Reload Window”
+	- Убедитесь, что выполнено `npm install`.
