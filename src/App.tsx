@@ -12,6 +12,7 @@ import Vacancies from "./pages/Vacancies";
 import VacancyDetail from "./pages/VacancyDetail";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
+import DepartmentAnalytics from "./pages/DepartmentAnalytics";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -76,6 +77,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Settings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/departments/:name"
+              element={
+                <ProtectedRoute>
+                  <DepartmentAnalytics />
                 </ProtectedRoute>
               }
             />

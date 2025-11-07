@@ -190,7 +190,12 @@ const Vacancies = () => {
                 <TableRow key={v.id} className="align-top cursor-pointer hover:bg-muted/40" onClick={() => navigate(`/vacancies/${v.id}`)}>
                   <TableCell>
                     <div className="font-semibold">{v.title}</div>
-                    <div className="text-xs text-muted-foreground">{v.department || '—'}</div>
+                    <button
+                      className="text-xs text-primary hover:underline"
+                      onClick={(e) => { e.stopPropagation(); if (v.department) navigate(`/departments/${encodeURIComponent(v.department)}`); }}
+                    >
+                      {v.department || '—'}
+                    </button>
                   </TableCell>
                   <TableCell>
                     <Badge className={`text-white ${VacancyStatusMap[v.status].color}`}>{VacancyStatusMap[v.status].label}</Badge>

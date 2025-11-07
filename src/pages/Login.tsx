@@ -15,7 +15,7 @@ const Login = () => {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     login();
-    navigate('/dashboard');
+  navigate('/analytics');
   };
 
   return (

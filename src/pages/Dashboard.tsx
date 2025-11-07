@@ -196,7 +196,7 @@ const Dashboard = () => {
           </DropdownMenu>
           <Button onClick={() => setUploadModalOpen(true)} className="gap-2">
             <Plus className="w-4 h-4" />
-            Загрузить интервью
+            Загрузить отчет
           </Button>
         </div>
 
