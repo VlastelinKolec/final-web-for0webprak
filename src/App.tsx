@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Report from "./pages/Report";
 import Vacancies from "./pages/Vacancies";
+import VacancyDetail from "./pages/VacancyDetail";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -57,6 +58,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Vacancies />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/vacancies/:id"
+              element={
+                <ProtectedRoute>
+                  <VacancyDetail />
                 </ProtectedRoute>
               }
             />
