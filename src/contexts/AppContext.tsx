@@ -233,7 +233,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       },
     ],
   }]);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    try {
+      return typeof window !== 'undefined' && localStorage.getItem('auth') === '1';
+    } catch {
+      return false;
+    }
+  });
   const [currentUser] = useState({ name: 'Александр Козлов', role: 'Рекрутер' });
 
   const addInterview = (interview: Omit<Interview, 'id' | 'date'>) => {
@@ -276,8 +282,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     );
   };
 
-  const login = () => setIsAuthenticated(true);
-  const logout = () => setIsAuthenticated(false);
+  const login = () => {
+    setIsAuthenticated(true);
+    try { localStorage.setItem('auth', '1'); } catch {}
+  };
+  const logout = () => {
+    setIsAuthenticated(false);
+    try { localStorage.removeItem('auth'); } catch {}
+  };
 
   // Vacancy CRUD
   const addVacancy: AppContextType['addVacancy'] = (vacancy) => {

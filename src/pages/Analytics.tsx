@@ -2,6 +2,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/contexts/AppContext';
 import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Chart as ChartJS,
@@ -18,6 +19,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 const Analytics = () => {
   const { interviews, vacancies } = useApp();
+  const navigate = useNavigate();
 
   // Фильтрация по вакансии
   const [selectedVacancyId, setSelectedVacancyId] = useState<string>('all');
@@ -175,7 +177,7 @@ const Analytics = () => {
                 {topCandidates.map((c) => (
                   <button
                     key={c.id}
-                    onClick={() => window.location.assign(`/report/${c.id}`)}
+                    onClick={() => navigate(`/report/${c.id}`)}
                     className="w-full text-left flex items-center justify-between border border-border rounded-md px-3 py-2 hover:bg-muted/50 transition-colors"
                   >
                     <div>
