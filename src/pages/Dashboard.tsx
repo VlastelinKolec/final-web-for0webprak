@@ -104,7 +104,7 @@ const Dashboard = () => {
           <p className="text-muted-foreground">Управляйте и просматривайте отчеты по интервью</p>
         </div>
 
-        <div className="flex items-center gap-4 mb-6">
+  <div className="flex items-center gap-4 mb-6 sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-4 z-10 border-b border-border">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
@@ -219,9 +219,7 @@ const Dashboard = () => {
                   key={interview.id}
                   className="cursor-pointer hover:bg-muted/30 transition-colors"
                   onClick={() => {
-                    if (interview.status === 'completed') {
-                      navigate(`/report/${interview.id}`);
-                    }
+                    navigate(`/report/${interview.id}`);
                   }}
                 >
                   <TableCell className="font-medium">{interview.candidate}</TableCell>

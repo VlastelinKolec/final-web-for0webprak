@@ -173,13 +173,17 @@ const Analytics = () => {
             <CardContent>
               <div className="space-y-3">
                 {topCandidates.map((c) => (
-                  <div key={c.id} className="flex items-center justify-between border border-border rounded-md px-3 py-2">
+                  <button
+                    key={c.id}
+                    onClick={() => window.location.assign(`/report/${c.id}`)}
+                    className="w-full text-left flex items-center justify-between border border-border rounded-md px-3 py-2 hover:bg-muted/50 transition-colors"
+                  >
                     <div>
-                      <div className="font-medium">{c.candidate}</div>
+                      <div className="font-medium underline-offset-2 hover:underline">{c.candidate}</div>
                       <div className="text-xs text-muted-foreground">{c.position}</div>
                     </div>
                     <div className="text-sm">{c.score} / <span className="text-muted-foreground">{c.match}%</span></div>
-                  </div>
+                  </button>
                 ))}
                 {topCandidates.length === 0 && <div className="text-sm text-muted-foreground">Данных пока недостаточно</div>}
               </div>

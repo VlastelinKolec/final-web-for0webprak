@@ -62,7 +62,7 @@ const DepartmentAnalytics = () => {
   const leaders = skillKeys.map((k) => {
     const best = candidateInterviews
       .filter((i) => i.skills)
-      .map((i) => ({ name: i.candidate, value: (i.skills as Record<string, number>)[k] || 0 }))
+      .map((i) => ({ id: i.id, name: i.candidate, value: (i.skills as Record<string, number>)[k] || 0 }))
       .sort((a, b) => b.value - a.value)[0];
     return { key: k, label: skillNames[k], best };
   });
@@ -142,7 +142,16 @@ const DepartmentAnalytics = () => {
                 {leaders.map((l) => (
                   <div key={l.key} className="border border-border rounded-md p-3">
                     <div className="text-xs text-muted-foreground mb-1">{l.label}</div>
-                    <div className="font-medium">{l.best ? `${l.best.name} — ${l.best.value}` : 'Недостаточно данных'}</div>
+                    {l.best ? (
+                      <button
+                        className="font-medium underline-offset-2 hover:underline text-left"
+                        onClick={() => navigate(`/report/${l.best!.id}`)}
+                      >
+                        {l.best.name} — {l.best.value}
+                      </button>
+                    ) : (
+                      <div className="font-medium">Недостаточно данных</div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -153,13 +162,17 @@ const DepartmentAnalytics = () => {
             <CardContent>
               <div className="space-y-3">
                 {recommended.map((c) => (
-                  <div key={c.id} className="flex items-center justify-between border border-border rounded-md px-3 py-2">
+                  <button
+                    key={c.id}
+                    onClick={() => navigate(`/report/${c.id}`)}
+                    className="w-full text-left flex items-center justify-between border border-border rounded-md px-3 py-2 hover:bg-muted/50 transition-colors"
+                  >
                     <div>
-                      <div className="font-medium">{c.name}</div>
+                      <div className="font-medium underline-offset-2 hover:underline">{c.name}</div>
                       <div className="text-xs text-muted-foreground">{c.position}</div>
                     </div>
                     <div className="text-sm">{c.score} / <span className="text-muted-foreground">{c.match}%</span></div>
-                  </div>
+                  </button>
                 ))}
                 {recommended.length === 0 && <div className="text-sm text-muted-foreground">Данных пока недостаточно</div>}
               </div>

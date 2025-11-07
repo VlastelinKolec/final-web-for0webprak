@@ -208,7 +208,11 @@ const Vacancies = () => {
                       {v.candidates.map(c => (
                         <div key={c.id} className="flex items-center justify-between gap-2 bg-muted/50 rounded-md px-2 py-1">
                           <div className="flex flex-col">
-                            <span className="text-sm font-medium">{c.name}</span>
+                            <button
+                              type="button"
+                              className="text-left text-sm font-medium hover:underline"
+                              onClick={(e) => { e.stopPropagation(); if (c.reportId) navigate(`/report/${c.reportId}`); }}
+                            >{c.name}</button>
                             <span className="text-[10px] text-muted-foreground">{stageLabel[c.stage]}</span>
                           </div>
                           <div className="flex items-center gap-1">
@@ -219,7 +223,7 @@ const Vacancies = () => {
                               <Badge
                                 variant="outline"
                                 className="text-[10px] cursor-pointer hover:bg-muted"
-                                onClick={() => navigate(`/report/${c.reportId}`)}
+                                onClick={(e) => { e.stopPropagation(); navigate(`/report/${c.reportId}`); }}
                               >Отчет</Badge>
                             )}
                             <Select value={c.stage} onValueChange={(val: CandidateStage) => updateCandidate(v.id, c.id, { stage: val })}>

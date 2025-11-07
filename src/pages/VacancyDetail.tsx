@@ -105,7 +105,11 @@ const VacancyDetail = () => {
               {vacancy.candidates.map((c) => (
                 <div key={c.id} className="flex items-start gap-3 bg-muted/40 rounded-md p-3">
                   <div className="flex-1">
-                    <div className="font-medium text-sm">{c.name}</div>
+                    <button
+                      type="button"
+                      className="font-medium text-sm hover:underline text-left"
+                      onClick={() => { if (c.reportId) navigate(`/report/${c.reportId}`); }}
+                    >{c.name}</button>
                     <div className="text-[11px] text-muted-foreground mb-1">{stageLabel[c.stage]}</div>
                     <div className="flex items-center gap-2">
                       <Select value={c.stage} onValueChange={(val: CandidateStage) => updateCandidate(vacancy.id, c.id, { stage: val })}>
