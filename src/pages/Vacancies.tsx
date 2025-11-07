@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Slider } from '@/components/ui/slider';
 import { Plus, Pencil, Trash2, Users, Filter } from 'lucide-react';
 import {
@@ -44,6 +45,7 @@ const Vacancies = () => {
   const [filterStage, setFilterStage] = useState<string>('');
   const [search, setSearch] = useState('');
   const [ratingMin, setRatingMin] = useState<number>(0);
+  const [selectedDepartments, setSelectedDepartments] = useState<string[]>([]);
 
   // Form state
   const [title, setTitle] = useState('');
@@ -72,7 +74,8 @@ const Vacancies = () => {
     const matchesStatus = filterStatus ? v.status === filterStatus : true;
     const matchesStage = filterStage ? v.candidates.some(c => c.stage === filterStage) : true;
     const matchesRating = ratingMin > 0 ? v.candidates.some(c => (c.rating || 0) >= ratingMin) : true;
-    return matchesSearch && matchesStatus && matchesStage && matchesRating;
+    const matchesDepartment = selectedDepartments.length > 0 ? selectedDepartments.includes(v.department || '') : true;
+    return matchesSearch && matchesStatus && matchesStage && matchesRating && matchesDepartment;
   });
 
   return (
@@ -117,7 +120,7 @@ const Vacancies = () => {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-3 mb-6 items-center">
+  <div className="flex flex-wrap gap-3 mb-6 items-center">
           <div className="relative">
             <Input placeholder="Поиск" value={search} onChange={e => setSearch(e.target.value)} className="w-56" />
           </div>
@@ -147,7 +150,25 @@ const Vacancies = () => {
             <span className="text-xs text-muted-foreground w-28">Мин. рейтинг: {ratingMin}</span>
             <Slider value={[ratingMin]} max={100} step={5} onValueChange={(vals) => setRatingMin(vals[0] ?? 0)} className="w-40" />
           </div>
-          <Button variant="outline" className="gap-2" onClick={() => { setFilterStatus(''); setFilterStage(''); setSearch(''); setRatingMin(0); }}>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">Департаменты</Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuLabel>Фильтр по департаменту</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {[...new Set(vacancies.map(v => v.department).filter(Boolean))].map(dep => (
+                <DropdownMenuCheckboxItem
+                  key={dep}
+                  checked={selectedDepartments.includes(dep!)}
+                  onCheckedChange={(checked) => {
+                    setSelectedDepartments(prev => checked ? [...prev, dep!] : prev.filter(d => d !== dep));
+                  }}
+                >{dep}</DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Button variant="outline" className="gap-2" onClick={() => { setFilterStatus(''); setFilterStage(''); setSearch(''); setRatingMin(0); setSelectedDepartments([]); }}>
             <Filter className="w-4 h-4" />
             Сбросить
           </Button>
@@ -165,7 +186,7 @@ const Vacancies = () => {
             </TableHeader>
             <TableBody>
               {filtered.map(v => (
-                <TableRow key={v.id} className="align-top">
+                <TableRow key={v.id} className="align-top cursor-pointer hover:bg-muted/40" onClick={() => navigate(`/vacancies/${v.id}`)}>
                   <TableCell>
                     <div className="font-semibold">{v.title}</div>
                     <div className="text-xs text-muted-foreground">{v.department || '—'}</div>
