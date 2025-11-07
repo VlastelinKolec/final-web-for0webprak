@@ -284,11 +284,21 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const login = () => {
     setIsAuthenticated(true);
-    try { localStorage.setItem('auth', '1'); } catch {}
+    try {
+      localStorage.setItem('auth', '1');
+    } catch (err) {
+      // non-fatal: storage might be unavailable (SSR/private mode)
+      void err;
+    }
   };
   const logout = () => {
     setIsAuthenticated(false);
-    try { localStorage.removeItem('auth'); } catch {}
+    try {
+      localStorage.removeItem('auth');
+    } catch (err) {
+      // non-fatal: storage might be unavailable (SSR/private mode)
+      void err;
+    }
   };
 
   // Vacancy CRUD
