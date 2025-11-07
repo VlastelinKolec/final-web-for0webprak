@@ -35,9 +35,12 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   };
 
   const navItems = [
-    { to: '/dashboard', icon: LayoutDashboard, label: 'История отчетов' },
-    { to: '/vacancies', icon: FileText, label: 'Вакансии' },
+    // Первая позиция – глобальная аналитика HRD
     { to: '/analytics', icon: BarChart3, label: 'Аналитика (HRD)' },
+    // История отчетов (бывший дашборд)
+    { to: '/dashboard', icon: LayoutDashboard, label: 'История отчетов' },
+    // Скрыли пункт "Вакансии" по требованию (оставляем маршрут, но не показываем ссылку)
+    // { to: '/vacancies', icon: FileText, label: 'Вакансии' },
     { to: '/settings', icon: Settings, label: 'Настройки (Админ)' },
   ];
 

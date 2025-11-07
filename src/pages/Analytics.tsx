@@ -1,6 +1,8 @@
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/contexts/AppContext';
+import { useMemo, useState } from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -16,13 +18,33 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 const Analytics = () => {
   const { interviews, vacancies } = useApp();
-  const completed = interviews.filter((i) => i.status === 'completed');
+
+  // Фильтрация по вакансии
+  const [selectedVacancyId, setSelectedVacancyId] = useState<string>('all');
+  const filteredVacancies = useMemo(() => {
+    if (selectedVacancyId === 'all') return vacancies;
+    return vacancies.filter((v) => v.id === selectedVacancyId);
+  }, [vacancies, selectedVacancyId]);
+
+  const filteredInterviewIds = useMemo(() => {
+    if (selectedVacancyId === 'all') return null as Set<string> | null;
+    const ids = new Set<string>();
+    filteredVacancies.forEach((v) => v.candidates.forEach((c) => { if (c.reportId) ids.add(c.reportId); }));
+    return ids;
+  }, [filteredVacancies, selectedVacancyId]);
+
+  const filteredInterviews = useMemo(() => {
+    if (!filteredInterviewIds) return interviews;
+    return interviews.filter((i) => filteredInterviewIds.has(i.id));
+  }, [interviews, filteredInterviewIds]);
+
+  const completed = filteredInterviews.filter((i) => i.status === 'completed');
 
   // KPIs
-  const totalInterviews = interviews.length;
+  const totalInterviews = filteredInterviews.length;
   const averageScore = completed.length ? Math.round(completed.reduce((s, i) => s + (i.score || 0), 0) / completed.length) : 0;
   const averageMatch = completed.length ? Math.round(completed.reduce((s, i) => s + (i.match || 0), 0) / completed.length) : 0;
-  const openVacancies = vacancies.filter((v) => v.status === 'open').length;
+  const openVacancies = filteredVacancies.filter((v) => v.status === 'open').length;
 
   // Average score by position
   const byPosition = completed.reduce<Record<string, { sum: number; count: number }>>((acc, i) => {
@@ -36,7 +58,7 @@ const Analytics = () => {
   const posScores = posLabels.map((p) => (byPosition[p].count ? Math.round(byPosition[p].sum / byPosition[p].count) : 0));
 
   // Stage distribution across all vacancies
-  const stageCounts = vacancies.reduce<Record<string, number>>((acc, v) => {
+  const stageCounts = filteredVacancies.reduce<Record<string, number>>((acc, v) => {
     v.candidates.forEach((c) => {
       acc[c.stage] = (acc[c.stage] || 0) + 1;
     });
@@ -78,9 +100,26 @@ const Analytics = () => {
   return (
     <DashboardLayout>
       <div className="p-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Аналитика (HRD)</h1>
-          <p className="text-muted-foreground">Глобальные метрики и тенденции по всем вакансиям</p>
+        <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Аналитика (HRD)</h1>
+            <p className="text-muted-foreground">
+              {selectedVacancyId === 'all' ? 'Глобальные метрики и тенденции по всем вакансиям' : 'Метрики и графики по выбранной вакансии'}
+            </p>
+          </div>
+          <div className="w-full sm:w-72">
+            <Select value={selectedVacancyId} onValueChange={setSelectedVacancyId}>
+              <SelectTrigger aria-label="Фильтр по вакансии">
+                <SelectValue placeholder="Выберите вакансию" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Все вакансии</SelectItem>
+                {vacancies.map((v) => (
+                  <SelectItem key={v.id} value={v.id}>{v.title}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {/* KPIs */}
