@@ -152,25 +152,35 @@ const Report = () => {
             </div>
           </div>
 
-          {/* Score */}
-          {interview.score && scoreLevel && (
-            <div className="bg-gradient-to-br from-primary/10 to-secondary/10 rounded-xl p-6 mb-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Общая оценка</p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-5xl font-bold text-foreground">
-                      {interview.score}
-                    </span>
-                    <span className="text-2xl text-muted-foreground">/100</span>
-                  </div>
-                </div>
-                <Badge className={`${scoreLevel.color} text-white text-base px-4 py-2`}>
-                  {scoreLevel.label}
-                </Badge>
+          {/* Key Metrics */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <div className="bg-card/50 border border-border rounded-xl p-5">
+              <p className="text-sm text-muted-foreground">Итоговая оценка</p>
+              <div className="flex items-end gap-2 mt-2">
+                <span className="text-4xl font-bold">{interview.score ?? '—'}</span>
+                {typeof interview.score === 'number' && (
+                  <span className="text-muted-foreground">/100</span>
+                )}
+              </div>
+              {interview.score && scoreLevel && (
+                <Badge className={`mt-3 ${scoreLevel.color} text-white`}>{scoreLevel.label}</Badge>
+              )}
+            </div>
+            <div className="bg-card/50 border border-border rounded-xl p-5">
+              <p className="text-sm text-muted-foreground">Уверенность</p>
+              <div className="flex items-end gap-2 mt-2">
+                <span className="text-4xl font-bold">{interview.confidence ?? '—'}</span>
+                {typeof interview.confidence === 'number' && <span className="text-muted-foreground">%</span>}
               </div>
             </div>
-          )}
+            <div className="bg-card/50 border border-border rounded-xl p-5">
+              <p className="text-sm text-muted-foreground">Соответствие</p>
+              <div className="flex items-end gap-2 mt-2">
+                <span className="text-4xl font-bold">{interview.match ?? '—'}</span>
+                {typeof interview.match === 'number' && <span className="text-muted-foreground">%</span>}
+              </div>
+            </div>
+          </div>
 
           {/* Chart */}
           <div className="mb-8">

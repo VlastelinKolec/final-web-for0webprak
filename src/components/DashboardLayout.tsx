@@ -35,7 +35,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   };
 
   const navItems = [
-    { to: '/dashboard', icon: LayoutDashboard, label: 'История анализов' },
+    { to: '/dashboard', icon: LayoutDashboard, label: 'История отчетов' },
+    { to: '/vacancies', icon: FileText, label: 'Вакансии' },
     { to: '/analytics', icon: BarChart3, label: 'Аналитика (HRD)' },
     { to: '/settings', icon: Settings, label: 'Настройки (Админ)' },
   ];

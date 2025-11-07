@@ -7,6 +7,7 @@ import { AppProvider, useApp } from "./contexts/AppContext";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Report from "./pages/Report";
+import Vacancies from "./pages/Vacancies";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -48,6 +49,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Analytics />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/vacancies"
+              element={
+                <ProtectedRoute>
+                  <Vacancies />
                 </ProtectedRoute>
               }
             />

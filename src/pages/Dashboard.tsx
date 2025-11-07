@@ -50,20 +50,20 @@ const Dashboard = () => {
     }
   };
 
-  const filteredInterviews = interviews.filter(
-    (interview) =>
-      interview.candidate.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      interview.position.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredInterviews = interviews
+    .filter(
+      (interview) =>
+        interview.candidate.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        interview.position.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return (
     <DashboardLayout>
       <div className="p-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">История анализов</h1>
-          <p className="text-muted-foreground">
-            Управляйте и просматривайте результаты анализа интервью
-          </p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">История отчетов</h1>
+          <p className="text-muted-foreground">Управляйте и просматривайте отчеты по интервью</p>
         </div>
 
         <div className="flex items-center gap-4 mb-6">
@@ -94,7 +94,9 @@ const Dashboard = () => {
                 <TableHead className="font-semibold">Вакансия</TableHead>
                 <TableHead className="font-semibold">Дата</TableHead>
                 <TableHead className="font-semibold">Статус</TableHead>
-                <TableHead className="font-semibold text-right">Оценка</TableHead>
+                <TableHead className="font-semibold text-right">Итог</TableHead>
+                <TableHead className="font-semibold text-right">Уверенность</TableHead>
+                <TableHead className="font-semibold text-right">% Соответствия</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -114,12 +116,26 @@ const Dashboard = () => {
                     {new Date(interview.date).toLocaleDateString('ru-RU')}
                   </TableCell>
                   <TableCell>{getStatusBadge(interview.status)}</TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right font-semibold">
                     {interview.score ? (
-                      <span className="font-semibold text-lg text-foreground">
+                      <span>
                         {interview.score}
-                        <span className="text-sm text-muted-foreground">/100</span>
+                        <span className="text-xs text-muted-foreground">/100</span>
                       </span>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {interview.confidence ? (
+                      <span className="text-foreground">{interview.confidence}%</span>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {interview.match ? (
+                      <span className="text-foreground">{interview.match}%</span>
                     ) : (
                       <span className="text-muted-foreground">—</span>
                     )}

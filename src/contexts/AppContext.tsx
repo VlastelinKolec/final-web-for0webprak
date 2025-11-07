@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
 export interface Interview {
   id: string;
@@ -7,6 +7,8 @@ export interface Interview {
   date: string;
   status: 'processing' | 'completed' | 'error';
   score?: number;
+  confidence?: number; // 0-100
+  match?: number; // % соответствия 0-100
   skills?: {
     communication: number;
     leadership: number;
@@ -21,10 +23,52 @@ export interface Interview {
   quotes?: string[];
 }
 
+export type VacancyStatus = 'open' | 'on_hold' | 'closed';
+export type CandidateStage =
+  | 'sourced'
+  | 'screening'
+  | 'interview'
+  | 'offer'
+  | 'hired'
+  | 'rejected';
+
+export interface CandidateProfile {
+  id: string;
+  name: string;
+  stage: CandidateStage;
+  status: 'active' | 'archived';
+  rating?: number; // 0-100
+  notes?: string;
+  reportId?: string; // link to Interview.id if a report exists
+}
+
+export interface Vacancy {
+  id: string;
+  title: string;
+  department?: string;
+  status: VacancyStatus;
+  createdAt: string;
+  updatedAt: string;
+  description?: string;
+  requirements?: string;
+  candidates: CandidateProfile[];
+}
+
 interface AppContextType {
   interviews: Interview[];
   addInterview: (interview: Omit<Interview, 'id' | 'date'>) => void;
   updateInterview: (id: string, updates: Partial<Interview>) => void;
+  vacancies: Vacancy[];
+  addVacancy: (vacancy: Omit<Vacancy, 'id' | 'createdAt' | 'updatedAt' | 'candidates'>) => void;
+  updateVacancy: (id: string, updates: Partial<Vacancy>) => void;
+  deleteVacancy: (id: string) => void;
+  addCandidateToVacancy: (vacancyId: string, candidate: Omit<CandidateProfile, 'id' | 'status'>) => void;
+  updateCandidate: (
+    vacancyId: string,
+    candidateId: string,
+    updates: Partial<CandidateProfile>
+  ) => void;
+  deleteCandidate: (vacancyId: string, candidateId: string) => void;
   currentUser: { name: string; role: string };
   isAuthenticated: boolean;
   login: () => void;
@@ -41,6 +85,8 @@ const mockInterviews: Interview[] = [
     date: '2025-10-28',
     status: 'completed',
     score: 87,
+    confidence: 82,
+    match: 88,
     skills: {
       communication: 85,
       leadership: 78,
@@ -71,6 +117,8 @@ const mockInterviews: Interview[] = [
     date: '2025-10-27',
     status: 'completed',
     score: 92,
+    confidence: 90,
+    match: 94,
     skills: {
       communication: 95,
       leadership: 90,
@@ -96,6 +144,8 @@ const mockInterviews: Interview[] = [
     date: '2025-10-26',
     status: 'completed',
     score: 78,
+    confidence: 75,
+    match: 80,
     skills: {
       communication: 82,
       leadership: 70,
@@ -120,6 +170,8 @@ const mockInterviews: Interview[] = [
     date: '2025-10-24',
     status: 'completed',
     score: 83,
+    confidence: 78,
+    match: 86,
     skills: {
       communication: 80,
       leadership: 75,
@@ -134,6 +186,53 @@ const mockInterviews: Interview[] = [
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [interviews, setInterviews] = useState<Interview[]>(mockInterviews);
+  const [vacancies, setVacancies] = useState<Vacancy[]>([{
+    id: 'v1',
+    title: 'Senior Frontend Developer',
+    department: 'R&D',
+    status: 'open',
+    createdAt: '2025-10-20',
+    updatedAt: '2025-10-28',
+    description: 'Разработка и поддержка фронтенд-части высоконагруженных сервисов',
+    requirements: 'React, TypeScript, Vite, Tailwind, архитектура приложений',
+    candidates: [
+      {
+        id: 'c1',
+        name: 'Анна Смирнова',
+        stage: 'interview',
+        status: 'active',
+        rating: 87,
+        notes: 'Сильный Т-шейп, хорошая коммуникация',
+        reportId: '1',
+      },
+      {
+        id: 'c2',
+        name: 'Михаил Иванов',
+        stage: 'screening',
+        status: 'active',
+        rating: 0,
+        notes: 'Ожидает собеседование',
+      },
+    ],
+  },
+  {
+    id: 'v2',
+    title: 'Product Manager',
+    department: 'Product',
+    status: 'on_hold',
+    createdAt: '2025-10-10',
+    updatedAt: '2025-10-27',
+    candidates: [
+      {
+        id: 'c3',
+        name: 'Дмитрий Волков',
+        stage: 'offer',
+        status: 'active',
+        rating: 92,
+        reportId: '2',
+      },
+    ],
+  }]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser] = useState({ name: 'Александр Козлов', role: 'Рекрутер' });
 
@@ -150,6 +249,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       updateInterview(newInterview.id, {
         status: 'completed',
         score: Math.floor(Math.random() * 30) + 70,
+        confidence: Math.floor(Math.random() * 21) + 70,
+        match: Math.floor(Math.random() * 21) + 75,
         skills: {
           communication: Math.floor(Math.random() * 30) + 70,
           leadership: Math.floor(Math.random() * 30) + 70,
@@ -178,12 +279,91 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const login = () => setIsAuthenticated(true);
   const logout = () => setIsAuthenticated(false);
 
+  // Vacancy CRUD
+  const addVacancy: AppContextType['addVacancy'] = (vacancy) => {
+    const now = new Date().toISOString().split('T')[0];
+    const v: Vacancy = {
+      id: Date.now().toString(),
+      title: vacancy.title,
+      department: vacancy.department,
+      status: vacancy.status,
+      description: vacancy.description,
+      requirements: vacancy.requirements,
+      createdAt: now,
+      updatedAt: now,
+      candidates: [],
+    };
+    setVacancies((prev) => [v, ...prev]);
+  };
+
+  const updateVacancy: AppContextType['updateVacancy'] = (id, updates) => {
+    setVacancies((prev) =>
+      prev.map((v) => (v.id === id ? { ...v, ...updates, updatedAt: new Date().toISOString().split('T')[0] } : v))
+    );
+  };
+
+  const deleteVacancy: AppContextType['deleteVacancy'] = (id) => {
+    setVacancies((prev) => prev.filter((v) => v.id !== id));
+  };
+
+  const addCandidateToVacancy: AppContextType['addCandidateToVacancy'] = (vacancyId, candidate) => {
+    setVacancies((prev) =>
+      prev.map((v) =>
+        v.id === vacancyId
+          ? {
+              ...v,
+              candidates: [
+                {
+                  id: Date.now().toString(),
+                  status: 'active',
+                  ...candidate,
+                },
+                ...v.candidates,
+              ],
+              updatedAt: new Date().toISOString().split('T')[0],
+            }
+          : v
+      )
+    );
+  };
+
+  const updateCandidate: AppContextType['updateCandidate'] = (vacancyId, candidateId, updates) => {
+    setVacancies((prev) =>
+      prev.map((v) =>
+        v.id === vacancyId
+          ? {
+              ...v,
+              candidates: v.candidates.map((c) => (c.id === candidateId ? { ...c, ...updates } : c)),
+              updatedAt: new Date().toISOString().split('T')[0],
+            }
+          : v
+      )
+    );
+  };
+
+  const deleteCandidate: AppContextType['deleteCandidate'] = (vacancyId, candidateId) => {
+    setVacancies((prev) =>
+      prev.map((v) =>
+        v.id === vacancyId
+          ? { ...v, candidates: v.candidates.filter((c) => c.id !== candidateId), updatedAt: new Date().toISOString().split('T')[0] }
+          : v
+      )
+    );
+  };
+
   return (
     <AppContext.Provider
       value={{
         interviews,
         addInterview,
         updateInterview,
+        vacancies,
+        addVacancy,
+        updateVacancy,
+        deleteVacancy,
+        addCandidateToVacancy,
+        updateCandidate,
+        deleteCandidate,
         currentUser,
         isAuthenticated,
         login,
