@@ -41,8 +41,9 @@ const Vacancies = () => {
   const { vacancies, addVacancy, updateVacancy, deleteVacancy, addCandidateToVacancy, updateCandidate, deleteCandidate } = useApp();
   const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
-  const [filterStatus, setFilterStatus] = useState<string>('');
-  const [filterStage, setFilterStage] = useState<string>('');
+  // Use 'all' sentinel instead of empty string to avoid Radix Select crash (value cannot be empty)
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterStage, setFilterStage] = useState<string>('all');
   const [search, setSearch] = useState('');
   const [ratingMin, setRatingMin] = useState<number>(0);
   const [selectedDepartments, setSelectedDepartments] = useState<string[]>([]);
@@ -71,8 +72,8 @@ const Vacancies = () => {
 
   const filtered = vacancies.filter(v => {
     const matchesSearch = v.title.toLowerCase().includes(search.toLowerCase()) || (v.department || '').toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = filterStatus ? v.status === filterStatus : true;
-    const matchesStage = filterStage ? v.candidates.some(c => c.stage === filterStage) : true;
+    const matchesStatus = filterStatus === 'all' ? true : v.status === filterStatus;
+    const matchesStage = filterStage === 'all' ? true : v.candidates.some(c => c.stage === filterStage);
     const matchesRating = ratingMin > 0 ? v.candidates.some(c => (c.rating || 0) >= ratingMin) : true;
     const matchesDepartment = selectedDepartments.length > 0 ? selectedDepartments.includes(v.department || '') : true;
     return matchesSearch && matchesStatus && matchesStage && matchesRating && matchesDepartment;
@@ -129,7 +130,7 @@ const Vacancies = () => {
               <SelectValue placeholder="Статус" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Все статусы</SelectItem>
+              <SelectItem value="all">Все статусы</SelectItem>
               <SelectItem value="open">Открыта</SelectItem>
               <SelectItem value="on_hold">Пауза</SelectItem>
               <SelectItem value="closed">Закрыта</SelectItem>
@@ -140,7 +141,7 @@ const Vacancies = () => {
               <SelectValue placeholder="Этап кандидата" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Все этапы</SelectItem>
+              <SelectItem value="all">Все этапы</SelectItem>
               {Object.entries(stageLabel).map(([k, v]) => (
                 <SelectItem key={k} value={k}>{v}</SelectItem>
               ))}
@@ -168,7 +169,7 @@ const Vacancies = () => {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button variant="outline" className="gap-2" onClick={() => { setFilterStatus(''); setFilterStage(''); setSearch(''); setRatingMin(0); setSelectedDepartments([]); }}>
+          <Button variant="outline" className="gap-2" onClick={() => { setFilterStatus('all'); setFilterStage('all'); setSearch(''); setRatingMin(0); setSelectedDepartments([]); }}>
             <Filter className="w-4 h-4" />
             Сбросить
           </Button>

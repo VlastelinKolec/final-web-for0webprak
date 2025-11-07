@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Search, Filter, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -33,13 +33,22 @@ const Dashboard = () => {
   const [minScore, setMinScore] = useState(0);
   const [minConfidence, setMinConfidence] = useState(0);
   const [minMatch, setMinMatch] = useState(0);
+  const [positions, setPositions] = useState<string[]>([]);
+  const [selectedPositions, setSelectedPositions] = useState<string[]>([]);
 
   const resetFilters = () => {
     setStatusFilter({ completed: false, processing: false, error: false });
     setMinScore(0);
     setMinConfidence(0);
     setMinMatch(0);
+    setSelectedPositions([]);
   };
+
+  // derive unique positions when interviews change
+  React.useEffect(() => {
+    const unique = Array.from(new Set(interviews.map(i => i.position).filter(Boolean)));
+    setPositions(unique);
+  }, [interviews]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -78,11 +87,12 @@ const Dashboard = () => {
       const matchesStatus = anyStatusSelected
         ? (statusFilter as Record<string, boolean>)[interview.status]
         : true;
+      const matchesPosition = selectedPositions.length > 0 ? selectedPositions.includes(interview.position) : true;
       const meetsScore = typeof interview.score === 'number' ? interview.score >= minScore : minScore === 0;
       const meetsConfidence =
         typeof interview.confidence === 'number' ? interview.confidence >= minConfidence : minConfidence === 0;
       const meetsMatch = typeof interview.match === 'number' ? interview.match >= minMatch : minMatch === 0;
-      return matchesSearch && matchesStatus && meetsScore && meetsConfidence && meetsMatch;
+      return matchesSearch && matchesStatus && matchesPosition && meetsScore && meetsConfidence && meetsMatch;
     })
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
@@ -132,6 +142,20 @@ const Dashboard = () => {
               >
                 Ошибка
               </DropdownMenuCheckboxItem>
+
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Позиция (вакансия)</DropdownMenuLabel>
+              {positions.map((pos) => (
+                <DropdownMenuCheckboxItem
+                  key={pos}
+                  checked={selectedPositions.includes(pos)}
+                  onCheckedChange={(v) =>
+                    setSelectedPositions((prev) => (v ? [...prev, pos] : prev.filter((p) => p !== pos)))
+                  }
+                >
+                  {pos}
+                </DropdownMenuCheckboxItem>
+              ))}
 
               <DropdownMenuSeparator />
               <DropdownMenuLabel>Пороговые значения</DropdownMenuLabel>
