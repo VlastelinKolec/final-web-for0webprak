@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
@@ -36,6 +37,7 @@ const stageLabel: Record<string, string> = {
 
 const Vacancies = () => {
   const { vacancies, addVacancy, updateVacancy, deleteVacancy, addCandidateToVacancy, updateCandidate, deleteCandidate } = useApp();
+  const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string>('');
   const [filterStage, setFilterStage] = useState<string>('');
@@ -186,7 +188,11 @@ const Vacancies = () => {
                               <span className="text-xs font-semibold">{c.rating}</span>
                             )}
                             {c.reportId && (
-                              <Badge variant="outline" className="text-[10px]">Отчет</Badge>
+                              <Badge
+                                variant="outline"
+                                className="text-[10px] cursor-pointer hover:bg-muted"
+                                onClick={() => navigate(`/report/${c.reportId}`)}
+                              >Отчет</Badge>
                             )}
                             <Select value={c.stage} onValueChange={(val) => updateCandidate(v.id, c.id, { stage: val as any })}>
                               <SelectTrigger className="h-7 w-28 text-[10px]">
