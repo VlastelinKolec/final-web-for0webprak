@@ -19,6 +19,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
+import type { CandidateStage, VacancyStatus } from '@/contexts/AppContext';
 
 const VacancyStatusMap: Record<string, { label: string; color: string }> = {
   open: { label: 'Открыта', color: 'bg-green-500' },
@@ -47,7 +48,7 @@ const Vacancies = () => {
   // Form state
   const [title, setTitle] = useState('');
   const [department, setDepartment] = useState('');
-  const [status, setStatus] = useState<'open' | 'on_hold' | 'closed'>('open');
+  const [status, setStatus] = useState<VacancyStatus>('open');
   const [description, setDescription] = useState('');
   const [requirements, setRequirements] = useState('');
 
@@ -97,7 +98,7 @@ const Vacancies = () => {
                 <div className="space-y-4">
                   <Input placeholder="Название" value={title} onChange={e => setTitle(e.target.value)} />
                   <Input placeholder="Департамент" value={department} onChange={e => setDepartment(e.target.value)} />
-                  <Select value={status} onValueChange={v => setStatus(v as any)}>
+                  <Select value={status} onValueChange={(v: VacancyStatus) => setStatus(v)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Статус" />
                     </SelectTrigger>
@@ -194,7 +195,7 @@ const Vacancies = () => {
                                 onClick={() => navigate(`/report/${c.reportId}`)}
                               >Отчет</Badge>
                             )}
-                            <Select value={c.stage} onValueChange={(val) => updateCandidate(v.id, c.id, { stage: val as any })}>
+                            <Select value={c.stage} onValueChange={(val: CandidateStage) => updateCandidate(v.id, c.id, { stage: val })}>
                               <SelectTrigger className="h-7 w-28 text-[10px]">
                                 <SelectValue />
                               </SelectTrigger>
