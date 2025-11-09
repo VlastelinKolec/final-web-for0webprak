@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useApp } from '@/contexts/AppContext';
-import { Badge } from '@/components/ui/badge';
+// no Badge needed here
 import {
   Chart as ChartJS,
   RadialLinearScale,
@@ -359,35 +359,146 @@ const Report = () => {
             </div>
           </div>
 
-          {/* Skill cards */}
+          {/* Skill map block - matches provided mock */}
           <div className="space-y-6">
-            <h2 className="text-xl font-semibold">Карта софт скиллов</h2>
-            <div className="grid md:grid-cols-3 gap-5">
-              {skillMetaMap.map(meta => (
-                <div key={meta.key} className="border border-border rounded-lg p-4 bg-card flex flex-col gap-3">
-                  <div className="flex items-start justify-between">
-                    <div className="text-sm font-semibold leading-tight pr-2">{meta.title}</div>
-                    <Badge className="bg-green-600 text-white text-[10px]">{skillsValues[meta.key as keyof typeof skillsValues]}%</Badge>
-                  </div>
-                  <div className="text-[11px] text-muted-foreground">Уровень: {skillsValues[meta.key as keyof typeof skillsValues] >= 85 ? 'Senior' : skillsValues[meta.key as keyof typeof skillsValues] >= 70 ? 'Upper-Middle' : 'Middle'}</div>
-                  <div className="text-[11px]">
-                    <span className="font-semibold">Индикаторы (сильные): </span>
-                    <ul className="list-disc ml-4 mt-1 space-y-1">
-                      {meta.strongIndicators.map(s => <li key={s}>{s}</li>)}
-                    </ul>
-                  </div>
-                  <div className="text-[11px]">
-                    <span className="font-semibold">Индикаторы (сигналы): </span>
-                    <ul className="list-disc ml-4 mt-1 space-y-1">
-                      {meta.riskIndicators.map(r => <li key={r}>{r}</li>)}
-                    </ul>
-                  </div>
-                  <div className="text-[11px]">
-                    <span className="font-semibold">Обоснование:</span> {meta.justification}
+            <h2 className="text-3xl font-bold tracking-tight">Карта софт скиллов</h2>
+
+            {/* helpers */}
+            {(() => {
+              const Gauge = ({ value }: { value: number }) => (
+                <div className="relative h-20 w-20" aria-label={`График ${value}%`}>
+                  <div
+                    className="absolute inset-0 rounded-full"
+                    style={{
+                      background: `conic-gradient(#16a34a ${value * 3.6}deg, #e6f6ea 0deg)`,
+                    }}
+                  />
+                  <div className="absolute inset-2 rounded-full bg-white" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center leading-tight">
+                      <div className="text-[10px] text-muted-foreground">Уровень</div>
+                      <div className="text-[10px] text-muted-foreground -mt-0.5">соответствия</div>
+                      <div className="text-xl font-extrabold text-green-700">{value}%</div>
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
+              );
+
+              const skills = [
+                {
+                  title: 'Управленческие навыки и лидерство',
+                  ai: 87,
+                  weight: 25,
+                  score: Math.max(0, Math.min(100, skillsValues.leadership || 88)) || 88,
+                  level: 'Senior',
+                  indicators: [
+                    'Управлял параллельно 2–3 проектами по 200–300 часов в месяц',
+                    'Самостоятельно предлагал и внедрял регламенты',
+                    'Восстановил проект после неудачного предыдущего',
+                  ],
+                  justification:
+                    'Кандидат показал зрелость в управлении людьми и процессами. Есть опыт кризисного менеджмента, построения процессов и коучинга. Демонстрируется инициативность в регламентации.',
+                },
+                {
+                  title: 'Коммуникации',
+                  ai: 76,
+                  weight: 20,
+                  score: Math.max(0, Math.min(100, skillsValues.communication || 92)) || 92,
+                  level: 'Senior',
+                  indicators: [
+                    'Налаживал отношения с ключевыми заказчиками после неудачного запуска',
+                    'Регулярно организовывал демонстрации для стейкхолдеров',
+                    'Выстраивал прозрачные отчёты для клиентов',
+                  ],
+                  justification:
+                    'Отличные навыки переговоров и ведения встреч. Умеет сглаживать конфликты и возвращать лояльность клиентов. Высокий уровень уверенности в презентациях и внешних коммуникациях.',
+                },
+                {
+                  title: 'Планирование и организация процессов',
+                  ai: 64,
+                  weight: 20,
+                  score: 84,
+                  level: 'Upper-Middle',
+                  indicators: [
+                    'Планировал обучение тим-лида/тех-тренинга и онбординг для команды',
+                    'Внедрял практики Agile и роли в команде',
+                    'Оптимизировал процесс онбординга новых сотрудников',
+                  ],
+                  justification:
+                    'Кандидат демонстрирует умение структурировать работу команды, описывать процессы и распределять зоны ответственности. Есть задел для достаточной масштабируемости и управляемости внедрений.',
+                },
+                {
+                  title: 'Командная работа и эмпатия',
+                  ai: 92,
+                  weight: 15,
+                  score: Math.max(0, Math.min(100, Math.round((skillsValues.teamwork + (skillsValues.emotional || 0)) / 2) || 78)) || 78,
+                  level: 'Middle / Upper-Middle',
+                  indicators: [
+                    'Всегда оперативно разбирал блокеры команды на еженедельных встречах',
+                    'Объяснял важность процессов простым языком',
+                  ],
+                  justification:
+                    'Есть готовность поддерживать команду и внимательность к людям. Чётко и корректно даёт обратную связь, старается развивать культуру прозрачности. Ценит ответственность и гибкость.',
+                },
+                {
+                  title: 'Решение проблем и критическое мышление',
+                  ai: 32,
+                  weight: 10,
+                  score: Math.max(0, Math.min(100, skillsValues.problemSolving || 81)) || 81,
+                  level: 'Upper-Middle',
+                  indicators: [
+                    'Успешно разбирал причины просрочек после инцидентов',
+                    'Предлагал решения для снижения рисков',
+                  ],
+                  justification:
+                    'Кандидат демонстрирует системность в анализе и причинно-следственных связях, опирается на данные и метрики. Понимает стоимость решения и его влияние на риск.',
+                },
+                {
+                  title: 'Адаптивность и устойчивость к стрессам',
+                  ai: 81,
+                  weight: 10,
+                  score: Math.max(0, Math.min(100, skillsValues.adaptability || 73)) || 73,
+                  level: 'Middle',
+                  indicators: [
+                    'Брал на себя проект в критичный период и завершил успешно',
+                    'Эффективно работал даже при высокой нагрузке и дедлайнах',
+                  ],
+                  justification:
+                    'Хорошая устойчивость к стрессу, не теряет фокус при изменении приоритетов. Сохраняет качество результата при возрастающей нагрузке.',
+                },
+              ];
+
+              return (
+                <div className="grid md:grid-cols-3 gap-6">
+                  {skills.map((s) => (
+                    <div key={s.title} className="rounded-2xl border bg-white p-6 space-y-4">
+                      <div className="text-[15px] font-semibold leading-snug">{s.title}</div>
+                      <div className="flex items-center gap-4">
+                        <Gauge value={s.score} />
+                        <div className="text-sm space-y-1">
+                          <div>Уверенность оценки ИИ: <span className="font-semibold">{s.ai}%</span></div>
+                          <div>Вес в общей оценке: <span className="font-semibold">{s.weight}%</span></div>
+                          <div>Уровень: <span className="font-semibold">{s.level}</span></div>
+                        </div>
+                      </div>
+                      <div className="text-sm">
+                        <div className="font-semibold mb-1">Индикаторы (цитаты):</div>
+                        <ul className="space-y-1">
+                          {s.indicators.map((i) => (
+                            <li key={i} className="flex items-start gap-2 text-[13px]">
+                              <Check className="mt-0.5 h-4 w-4 text-green-600" /> {i}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="text-[13px] leading-relaxed">
+                        <span className="font-semibold">Обоснование:</span> {s.justification}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
 
           {/* Radar */}
