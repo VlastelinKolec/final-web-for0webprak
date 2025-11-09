@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Share2, Download, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Share2, Download, CheckCircle2, AlertTriangle, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useApp } from '@/contexts/AppContext';
 import { Badge } from '@/components/ui/badge';
@@ -188,84 +189,97 @@ const Report = () => {
             <ArrowLeft className="w-4 h-4"/>Назад к списку кандидатов
           </button>
 
-          {/* Candidate header + decision blocks */}
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="md:col-span-2 bg-card border border-border rounded-xl p-6 space-y-6">
-              <div className="flex items-center gap-4">
-                <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted flex items-center justify-center text-sm font-semibold">
-                  {interview.candidate.split(' ').map(p=>p[0]).join('')}
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold mb-1">{interview.candidate}</h1>
-                  <p className="text-sm text-muted-foreground">{interview.position}</p>
-                </div>
-                <div className="ml-auto flex gap-2">
-                  <Button variant="outline" size="sm" onClick={copyLink}><Share2 className="w-4 h-4 mr-1"/>Скопировать ссылку</Button>
-                  <Button variant="outline" size="sm"><Download className="w-4 h-4 mr-1"/>PDF</Button>
-                </div>
+          {/* Top block redesigned to match reference screenshot */}
+          <div className="space-y-10">
+            {/* Header row */}
+            <div className="flex items-start gap-6">
+              <div className="w-32 h-32 rounded-lg overflow-hidden bg-muted flex items-center justify-center text-xl font-semibold">
+                {interview.candidate.split(' ').map(p=>p[0]).join('')}
               </div>
-              <div className="grid sm:grid-cols-2 gap-4 text-xs">
-                <div className="space-y-2">
-                  <div className="font-semibold text-muted-foreground">Сведения о кандидате</div>
-                  <div className="grid grid-cols-3 gap-y-1">
-                    <span className="text-muted-foreground">Возраст:</span><span className="col-span-2">—</span>
-                    <span className="text-muted-foreground">Локация:</span><span className="col-span-2">—</span>
-                    <span className="text-muted-foreground">Формат работы:</span><span className="col-span-2">Удаленно / гибрид</span>
-                    <span className="text-muted-foreground">Желаемая з/п:</span><span className="col-span-2">—</span>
-                    <span className="text-muted-foreground">Мотивация:</span><span className="col-span-2">Рост ответственности, влияние на продукт</span>
-                  </div>
-                  <div className="flex flex-wrap gap-1 pt-2">
-                    {tags.map(t => <span key={t} className="text-[10px] px-2 py-1 rounded-full bg-muted text-muted-foreground">{t}</span>)}
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="rounded-lg border border-border p-4 bg-muted/40">
-                    <div className="text-xs font-semibold mb-1">Решение о переходе на следующий этап</div>
-                    <div className="text-sm flex items-center gap-2 font-medium">Итог: {decision === 'Да' && <CheckCircle2 className="w-4 h-4 text-green-600"/>}{decision}</div>
-                    <div className="mt-2 text-xs text-muted-foreground">Уровень уверенности: {interview.confidence ?? '—'}%</div>
-                    <div className="text-xs text-muted-foreground">Общее соответствие: {overallMatch}%</div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="border border-green-200 bg-green-50 rounded-md p-3 text-[11px] space-y-1">
-                      <div className="font-semibold text-green-700">Аргументы «За»:</div>
-                      <ul className="list-disc ml-4 space-y-1">
-                        <li>Устойчивые кейсы роста в предыдущих ролях</li>
-                        <li>Развитая коммуникация со стейкхолдерами</li>
-                        <li>Хороший баланс системности и инициативы</li>
-                      </ul>
-                    </div>
-                    <div className="border border-red-200 bg-red-50 rounded-md p-3 text-[11px] space-y-1">
-                      <div className="font-semibold text-red-700">Аргументы «Против»:</div>
-                      <ul className="list-disc ml-4 space-y-1">
-                        <li>Риск перегрузки вниманием к деталям</li>
-                        <li>Мало примеров делегирования</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
+              <div className="flex-1 pt-2">
+                <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 text-foreground">{interview.candidate}</h1>
+                <p className="text-base text-muted-foreground leading-snug">
+                  Senior Project Manager<br/> (IT, e-commerce)
+                </p>
+              </div>
+              <div className="flex flex-col gap-3">
+                <Button size="icon" variant="outline" className="rounded-full h-11 w-11 bg-muted/30 hover:bg-muted" aria-label="Скачать PDF">
+                  <Download className="w-5 h-5" />
+                </Button>
+                <Button size="icon" variant="outline" className="rounded-full h-11 w-11 bg-muted/30 hover:bg-muted" onClick={copyLink} aria-label="Скопировать ссылку">
+                  <Share2 className="w-5 h-5" />
+                </Button>
               </div>
             </div>
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 gap-3">
-                <div className="border rounded-md p-4 bg-card">
-                  <div className="text-xs text-muted-foreground mb-1">Общий процент соответствия</div>
-                  <div className="flex items-baseline gap-2"><span className="text-3xl font-bold text-green-600">{overallMatch}%</span><span className="text-xs text-muted-foreground">из 100%</span></div>
-                  <div className="mt-2 text-xs">{interview.candidate}</div>
+
+            {/* Info + Decision */}
+            <div className="grid lg:grid-cols-2 gap-8">
+              {/* Left: candidate info */}
+              <div className="space-y-6">
+                <h2 className="text-xl font-semibold">Сведения о кандидате</h2>
+                <Input readOnly value="https://huntflow.ru/12345678912345678912345678912345" className="h-10 text-sm" />
+                <div className="grid sm:grid-cols-2 gap-x-12 gap-y-4 text-sm">
+                  <div className="space-y-1">
+                    <div className="font-semibold">Опыт:</div>
+                    <div>9 лет</div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="font-semibold">Ключевые компании:</div>
+                    <div>Ozon, Яндекс, стартап в финтехе</div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="font-semibold">ЗП ожидания:</div>
+                    <div>280 000 руб (на руки)</div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="font-semibold">Формат работы:</div>
+                    <div>гибрид / удалёнка</div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="font-semibold">Предпочтения:</div>
+                    <div>Продуктовые команды, Agile-проекты(на руки)</div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="font-semibold">Мотивация:</div>
+                    <div>Рост влияния и ответственности</div>
+                  </div>
                 </div>
-                <div className="border rounded-md p-4 bg-card">
-                  <div className="text-xs text-muted-foreground mb-1">Что перепроверить дополнительно</div>
-                  <ul className="text-[11px] space-y-1 list-disc ml-4">
-                    <li>Глубина коучинга команды</li>
-                    <li>Работа с техническим долгом</li>
+                <div className="space-y-2 text-sm">
+                  <div className="font-semibold">Описание кандидата:</div>
+                  <p className="leading-relaxed text-muted-foreground">
+                    Сформированный лидер с опытом управления IT-проектами в e-commerce и финтехе. Руководил распределёнными командами до 15 человек, запускал продукты с нуля и развивал существующие. Имеет успешный опыт внедрения Agile-практик, оптимизации процессов и выстраивания взаимодействия между бизнесом и разработкой.
+                    Кандидат ищет проект, где сможет совмещать управление продуктом и людьми, развивать культуру прозрачных процессов и брать ответственность за результат.
+                  </p>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {tags.map(t => <span key={t} className="text-[11px] px-2 py-1 rounded-full bg-muted text-foreground/70">{t}</span>)}
+                  </div>
+                </div>
+              </div>
+              {/* Right: decision & arguments */}
+              <div className="space-y-6">
+                <div className="border rounded-xl p-6 bg-card">
+                  <h3 className="text-lg font-semibold mb-4 leading-tight">Решение о переходе на следующий этап</h3>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex items-center gap-2"><span className="font-semibold">Итог:</span> {decision === 'Да' ? <span className="flex items-center gap-1 text-green-700"><CheckCircle2 className="w-4 h-4"/>Да</span> : decision}</div>
+                    <div className="flex items-center gap-2"><span className="font-semibold">Уровень уверенности:</span> <span className="flex items-center gap-1 text-green-700"><Check className="w-4 h-4"/>Высокий</span></div>
+                    <div className="flex items-center gap-2"><span className="font-semibold">Степень соответствия:</span> {overallMatch}%</div>
+                  </div>
+                </div>
+                <div className="border rounded-xl p-6 bg-green-50 border-green-200 space-y-3">
+                  <h4 className="font-semibold text-green-700">Аргументы «За»:</h4>
+                  <ul className="space-y-1 text-sm">
+                    <li className="flex items-start gap-2"><Check className="w-4 h-4 text-green-600"/> Успешные кейсы запуска в крупных компаниях.</li>
+                    <li className="flex items-start gap-2"><Check className="w-4 h-4 text-green-600"/> Развитые коммуникативные навыки, умение убеждать.</li>
+                    <li className="flex items-start gap-2"><Check className="w-4 h-4 text-green-600"/> Опыт работы в продуктовой среде (e-commerce).</li>
+                    <li className="flex items-start gap-2"><Check className="w-4 h-4 text-green-600"/> Зрелый уровень самоанализа и системного мышления.</li>
                   </ul>
                 </div>
-                <div className="border rounded-md p-4 bg-card">
-                  <div className="text-xs text-muted-foreground mb-1">Решение</div>
-                  <div className="flex items-center gap-2 text-sm font-semibold text-green-600"><CheckCircle2 className="w-4 h-4"/> {decision}</div>
-                </div>
-                <div className="border rounded-md p-4 bg-card">
-                  <div className="text-xs text-muted-foreground mb-1">Рекомендованный шаг</div>
-                  <div className="text-[11px]">{recommendedStep}</div>
+                <div className="border rounded-xl p-6 bg-red-50 border-red-200 space-y-3">
+                  <h4 className="font-semibold text-red-700">Аргументы «Против»:</h4>
+                  <ul className="space-y-1 text-sm">
+                    <li className="flex items-start gap-2"><X className="w-4 h-4 text-red-600"/> Высокие ожидания по ЗП.</li>
+                    <li className="flex items-start gap-2"><X className="w-4 h-4 text-red-600"/> Небольшой опыт в заказных проектах.</li>
+                  </ul>
                 </div>
               </div>
             </div>
