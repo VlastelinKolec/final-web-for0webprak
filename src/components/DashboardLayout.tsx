@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { Avatar, AvatarFallback } from './ui/avatar';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -35,13 +36,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   };
 
   const navItems = [
-    // Первая позиция – глобальная аналитика HRD
-    { to: '/analytics', icon: BarChart3, label: 'Аналитика (HRD)' },
-    // История отчетов (бывший дашборд)
-    { to: '/dashboard', icon: LayoutDashboard, label: 'История отчетов' },
-    // Скрыли пункт "Вакансии" по требованию (оставляем маршрут, но не показываем ссылку)
+    { to: '/analytics', icon: BarChart3, label: 'Аналитика (HRD)', hint: 'Глобальные метрики и тренды' },
+    { to: '/dashboard', icon: LayoutDashboard, label: 'История отчетов', hint: 'Список интервью и отчеты' },
     // { to: '/vacancies', icon: FileText, label: 'Вакансии' },
-    { to: '/settings', icon: Settings, label: 'Настройки (Админ)' },
+    { to: '/settings', icon: Settings, label: 'Настройки (Админ)', hint: 'Конфигурация системы' },
   ];
 
   return (
@@ -54,20 +52,28 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
         <nav className="flex-1 p-4 space-y-1">
           {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                  isActive
-                    ? 'bg-primary text-primary-foreground shadow-md'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                }`
-              }
-            >
-              <item.icon className="w-5 h-5" />
-              <span className="font-medium">{item.label}</span>
-            </NavLink>
+            <Tooltip key={item.to}>
+              <TooltipTrigger asChild>
+                <NavLink
+                  to={item.to}
+                  className={({ isActive }) =>
+                    `group relative flex items-center gap-3 px-4 py-3 rounded-lg transition-all border-l-4 ${
+                      isActive
+                        ? 'bg-primary text-primary-foreground shadow-md border-primary'
+                        : 'text-muted-foreground hover:bg-muted hover:text-foreground border-transparent'
+                    }`
+                  }
+                >
+                  <item.icon className="w-5 h-5" />
+                  <span className="font-medium">{item.label}</span>
+                </NavLink>
+              </TooltipTrigger>
+              {item.hint && (
+                <TooltipContent side="right" className="max-w-[220px]">
+                  {item.hint}
+                </TooltipContent>
+              )}
+            </Tooltip>
           ))}
         </nav>
 
