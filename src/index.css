@@ -8,8 +8,9 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 150 20% 96%;
-    --foreground: 210 30% 15%;
+    /* Brand palette tuned to landing screenshot */
+    --background: 150 20% 96%; /* subtle mint background */
+    --foreground: 209 30% 16%;
 
     --card: 0 0% 100%;
     --card-foreground: 210 30% 15%;
@@ -17,16 +18,18 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 210 30% 15%;
 
-    --primary: 180 50% 50%;
+  /* Primary uses teal (brand) */
+  --primary: 173 80% 32%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 95 45% 55%;
+  /* Secondary uses grass green */
+  --secondary: 95 50% 46%;
     --secondary-foreground: 0 0% 100%;
 
     --muted: 210 20% 94%;
     --muted-foreground: 210 15% 45%;
 
-    --accent: 180 50% 50%;
+  --accent: 199 84% 55%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -34,16 +37,16 @@ All colors MUST be HSL.
 
     --border: 210 20% 88%;
     --input: 210 20% 94%;
-    --ring: 180 50% 50%;
+  --ring: 173 80% 32%;
 
     --radius: 0.75rem;
     
-    --success: 95 45% 55%;
+  --success: 142 70% 40%;
     --warning: 45 95% 60%;
-    --info: 180 50% 50%;
+  --info: 199 84% 55%;
     
-    --gradient-primary: linear-gradient(135deg, hsl(180 50% 50%), hsl(95 45% 55%));
-    --gradient-subtle: linear-gradient(180deg, hsl(150 20% 98%), hsl(150 20% 94%));
+  --gradient-primary: linear-gradient(135deg, hsl(95 50% 46%), hsl(173 80% 32%), hsl(199 84% 55%));
+  --gradient-subtle: linear-gradient(180deg, hsl(150 22% 97%), hsl(150 20% 94%));
     
     --shadow-sm: 0 1px 2px 0 hsl(210 30% 15% / 0.05);
     --shadow-md: 0 4px 6px -1px hsl(210 30% 15% / 0.1);
@@ -112,6 +115,6 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
   }
 }

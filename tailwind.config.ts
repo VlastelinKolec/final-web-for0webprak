@@ -6,6 +6,9 @@ export default {
   content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
   prefix: "",
   theme: {
+    fontFamily: {
+      sans: ["Manrope", "system-ui", "Arial", "sans-serif"],
+    },
     container: {
       center: true,
       padding: "2rem",
@@ -15,6 +18,12 @@ export default {
     },
     extend: {
       colors: {
+        brand: {
+          green: "hsl(142 70% 40%)", // #22c55e approx darker
+          teal: "hsl(173 80% 32%)", // primary accent from screenshot
+          blue: "hsl(199 84% 55%)", // CTA end color
+          grass: "hsl(95 50% 46%)",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
