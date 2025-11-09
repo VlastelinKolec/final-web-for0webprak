@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Share2, Download, CheckCircle2, AlertTriangle, Check, X } from 'lucide-react';
+import { ArrowLeft, Share2, Download, CheckCircle2, AlertTriangle, Check, X, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -280,6 +280,80 @@ const Report = () => {
                     <li className="flex items-start gap-2"><X className="w-4 h-4 text-red-600"/> Высокие ожидания по ЗП.</li>
                     <li className="flex items-start gap-2"><X className="w-4 h-4 text-red-600"/> Небольшой опыт в заказных проектах.</li>
                   </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Manager summary block */}
+          <div className="space-y-6">
+            <h2 className="text-3xl font-bold tracking-tight">Итоговая сводка для руководителя</h2>
+            <div className="grid lg:grid-cols-2 gap-6">
+              {/* Overall match */}
+              <div className="rounded-2xl border bg-card p-6">
+                <div className="text-lg font-semibold mb-4">Общий процент соответствия:</div>
+                <div className="flex items-center gap-5">
+                  <div className="text-5xl font-extrabold text-green-700 shrink-0">{overallMatch}%</div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-12 h-12 rounded-lg overflow-hidden bg-muted flex items-center justify-center font-semibold">
+                        {interview.candidate.split(' ').map(p=>p[0]).join('')}
+                      </div>
+                      <div className="leading-tight">
+                        <div className="font-semibold text-sm">{interview.candidate}</div>
+                        <div className="text-xs text-muted-foreground">Соответствие</div>
+                      </div>
+                    </div>
+                    <div className="relative">
+                      <div className="h-2 rounded-full bg-green-100" />
+                      <div className="absolute inset-y-0 left-0 h-2 rounded-full bg-green-600" style={{ width: `${overallMatch}%` }} />
+                      <div className="absolute -top-6 right-0 text-xs text-muted-foreground">{overallMatch} / 100</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Recheck additionally */}
+              <div className="rounded-2xl border bg-card p-6">
+                <div className="text-lg font-semibold mb-4">Что перепроверить дополнительно:</div>
+                <ul className="space-y-3 text-sm">
+                  <li className="flex items-start gap-3">
+                    <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-sky-100 text-sky-700">
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </span>
+                    Подтвердить рекомендации от предыдущих работодателей.
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-sky-100 text-sky-700">
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </span>
+                    Уточнить готовность к офисному формату.
+                  </li>
+                </ul>
+              </div>
+
+              {/* Decision */}
+              <div className="rounded-2xl border bg-card p-6">
+                <div className="text-lg font-semibold mb-4">Решение:</div>
+                <div className="flex items-start gap-4">
+                  <div className="h-10 w-10 rounded-full bg-green-100 text-green-700 flex items-center justify-center shrink-0">
+                    <Check className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-green-700 leading-tight">{decision}</div>
+                    <div className="text-sm text-muted-foreground mt-1">(с условием уточнения по ЗП и формату работы).</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Recommended step */}
+              <div className="rounded-2xl border bg-green-50 p-6 border-green-200">
+                <div className="text-lg font-semibold mb-4">Рекомендованный шаг:</div>
+                <div className="flex items-start gap-3 text-base">
+                  <span className="mt-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-sky-100 text-sky-700">
+                    <ArrowRight className="h-4 w-4" />
+                  </span>
+                  Пригласить на финальное собеседование с руководителем отдела.
                 </div>
               </div>
             </div>
