@@ -136,30 +136,40 @@ const Analytics = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <Card>
             <CardHeader><CardTitle>Средний балл по позициям</CardTitle></CardHeader>
-            <CardContent><div className="h-[300px]"><Bar data={{ labels: posLabels, datasets: [{ label: 'Баллы', data: posScores, backgroundColor: 'hsl(180 50% 50% / 0.6)' }] }} options={chartOptions} /></div></CardContent>
+            <CardContent>
+              {posLabels.length === 0 ? (
+                <div className="h-[300px] flex items-center justify-center text-sm text-muted-foreground">Нет данных для отображения</div>
+              ) : (
+                <div className="h-[300px]"><Bar data={{ labels: posLabels, datasets: [{ label: 'Баллы', data: posScores, backgroundColor: 'hsl(180 50% 50% / 0.6)' }] }} options={chartOptions} /></div>
+              )}
+            </CardContent>
           </Card>
           <Card>
             <CardHeader><CardTitle>Распределение по этапам найма</CardTitle></CardHeader>
             <CardContent>
               <div className="h-[300px]">
-                <Bar
-                  data={{
-                    labels: stageLabels.map((s) => (
-                      ({
-                        sourced: 'Поиск',
-                        screening: 'Скрининг',
-                        interview: 'Интервью',
-                        offer: 'Оффер',
-                        hired: 'Нанят',
-                        rejected: 'Отказ',
-                      } as Record<string, string>)[s]
-                    )),
-                    datasets: [
-                      { label: 'Кол-во', data: stageData, backgroundColor: 'hsl(95 45% 55% / 0.6)' },
-                    ],
-                  }}
-                  options={chartOptions}
-                />
+                {stageData.every(v => v === 0) ? (
+                  <div className="h-full flex items-center justify-center text-sm text-muted-foreground">Нет кандидатов на этапах</div>
+                ) : (
+                  <Bar
+                    data={{
+                      labels: stageLabels.map((s) => (
+                        ({
+                          sourced: 'Поиск',
+                          screening: 'Скрининг',
+                          interview: 'Интервью',
+                          offer: 'Оффер',
+                          hired: 'Нанят',
+                          rejected: 'Отказ',
+                        } as Record<string, string>)[s]
+                      )),
+                      datasets: [
+                        { label: 'Кол-во', data: stageData, backgroundColor: 'hsl(95 45% 55% / 0.6)' },
+                      ],
+                    }}
+                    options={chartOptions}
+                  />
+                )}
               </div>
             </CardContent>
           </Card>
@@ -168,7 +178,13 @@ const Analytics = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
             <CardHeader><CardTitle>Средние soft skills</CardTitle></CardHeader>
-            <CardContent><div className="h-[320px]"><Bar data={{ labels: skillLabels, datasets: [{ label: 'Оценка', data: skillsAvg, backgroundColor: 'hsl(200 60% 60% / 0.6)' }] }} options={chartOptions} /></div></CardContent>
+            <CardContent>
+              {skillsAvg.every(v => v === 0) ? (
+                <div className="h-[320px] flex items-center justify-center text-sm text-muted-foreground">Нет завершенных интервью с оценками навыков</div>
+              ) : (
+                <div className="h-[320px]"><Bar data={{ labels: skillLabels, datasets: [{ label: 'Оценка', data: skillsAvg, backgroundColor: 'hsl(200 60% 60% / 0.6)' }] }} options={chartOptions} /></div>
+              )}
+            </CardContent>
           </Card>
           <Card>
             <CardHeader><CardTitle>Рекомендованные кандидаты</CardTitle></CardHeader>

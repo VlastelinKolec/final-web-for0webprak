@@ -105,30 +105,40 @@ const DepartmentAnalytics = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
             <CardHeader><CardTitle>Средний балл по вакансиям</CardTitle></CardHeader>
-            <CardContent><div className="h-[300px]"><Bar data={{ labels: vacLabels, datasets: [{ label: 'Баллы', data: vacScores, backgroundColor: 'hsl(180 50% 50% / 0.6)' }] }} options={chartOptions} /></div></CardContent>
+            <CardContent>
+              {vacLabels.length === 0 ? (
+                <div className="h-[300px] flex items-center justify-center text-sm text-muted-foreground">Нет завершенных интервью для вычисления</div>
+              ) : (
+                <div className="h-[300px]"><Bar data={{ labels: vacLabels, datasets: [{ label: 'Баллы', data: vacScores, backgroundColor: 'hsl(180 50% 50% / 0.6)' }] }} options={chartOptions} /></div>
+              )}
+            </CardContent>
           </Card>
           <Card>
             <CardHeader><CardTitle>Распределение этапов</CardTitle></CardHeader>
             <CardContent>
               <div className="h-[300px]">
-                <Bar
-                  data={{
-                    labels: stageLabels.map((s) => (
-                      ({
-                        sourced: 'Поиск',
-                        screening: 'Скрининг',
-                        interview: 'Интервью',
-                        offer: 'Оффер',
-                        hired: 'Нанят',
-                        rejected: 'Отказ',
-                      } as Record<string, string>)[s]
-                    )),
-                    datasets: [
-                      { label: 'Кол-во', data: stageData, backgroundColor: 'hsl(95 45% 55% / 0.6)' },
-                    ],
-                  }}
-                  options={chartOptions}
-                />
+                {stageData.every(v => v === 0) ? (
+                  <div className="h-full flex items-center justify-center text-sm text-muted-foreground">Нет кандидатов на этапах</div>
+                ) : (
+                  <Bar
+                    data={{
+                      labels: stageLabels.map((s) => (
+                        ({
+                          sourced: 'Поиск',
+                          screening: 'Скрининг',
+                          interview: 'Интервью',
+                          offer: 'Оффер',
+                          hired: 'Нанят',
+                          rejected: 'Отказ',
+                        } as Record<string, string>)[s]
+                      )),
+                      datasets: [
+                        { label: 'Кол-во', data: stageData, backgroundColor: 'hsl(95 45% 55% / 0.6)' },
+                      ],
+                    }}
+                    options={chartOptions}
+                  />
+                )}
               </div>
             </CardContent>
           </Card>

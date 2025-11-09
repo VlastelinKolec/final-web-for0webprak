@@ -121,7 +121,7 @@ const Vacancies = () => {
           </div>
         </div>
 
-  <div className="flex flex-wrap gap-3 mb-6 items-center">
+  <div className="flex flex-wrap gap-3 mb-6 items-center sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-3 z-10 border-b border-border">
           <div className="relative">
             <Input placeholder="Поиск" value={search} onChange={e => setSearch(e.target.value)} className="w-56" />
           </div>

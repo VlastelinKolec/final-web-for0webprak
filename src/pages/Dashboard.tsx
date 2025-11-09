@@ -79,6 +79,14 @@ const Dashboard = () => {
   };
 
   const anyStatusSelected = statusFilter.completed || statusFilter.processing || statusFilter.error;
+  const activeFiltersCount =
+    (statusFilter.completed ? 1 : 0) +
+    (statusFilter.processing ? 1 : 0) +
+    (statusFilter.error ? 1 : 0) +
+    (selectedPositions.length > 0 ? 1 : 0) +
+    (minScore > 0 ? 1 : 0) +
+    (minConfidence > 0 ? 1 : 0) +
+    (minMatch > 0 ? 1 : 0);
   const filteredInterviews = interviews
     .filter((interview) => {
       const matchesSearch =
@@ -118,7 +126,7 @@ const Dashboard = () => {
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="gap-2">
                 <Filter className="w-4 h-4" />
-                Фильтры
+                Фильтры{activeFiltersCount > 0 ? ` (${activeFiltersCount})` : ''}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80">
