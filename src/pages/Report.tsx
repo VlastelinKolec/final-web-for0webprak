@@ -575,7 +575,6 @@ const Report = () => {
                 <a className="hover:text-foreground" href="#">Тарифы</a>
                 <a className="hover:text-foreground" href="#">Контакты</a>
               </div>
-              <Button size="sm" variant="secondary">Записаться на демо</Button>
             </div>
             <div className="flex flex-wrap justify-between gap-4">
 
