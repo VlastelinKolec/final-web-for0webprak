@@ -578,11 +578,7 @@ const Report = () => {
               <Button size="sm" variant="secondary">Записаться на демо</Button>
             </div>
             <div className="flex flex-wrap justify-between gap-4">
-              <div>© 2025 ООО «TalentMind». Политика обработки персональных данных.</div>
-              <div className="space-y-1 text-xs">
-                <div>info@talentmind.ru</div>
-                <div>+7 (495) 540-37-99</div>
-              </div>
+
             </div>
           </footer>
         </div>
