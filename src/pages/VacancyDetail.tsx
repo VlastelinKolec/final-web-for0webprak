@@ -47,7 +47,7 @@ const VacancyDetail = () => {
     return (
       <DashboardLayout>
         <div className="p-8">
-          <Button variant="ghost" onClick={() => navigate('/vacancies')} className="mb-6 gap-2">
+          <Button variant="ghost" onClick={() => navigate('/dashboard')} className="mb-6 gap-2">
             <ArrowLeft className="w-4 h-4" />
             Назад к вакансиям
           </Button>
@@ -93,7 +93,7 @@ const VacancyDetail = () => {
       <div className="p-8 space-y-8">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={() => navigate('/vacancies')} className="gap-2">
+            <Button variant="ghost" onClick={() => navigate('/dashboard')} className="gap-2">
               <ArrowLeft className="w-4 h-4" />
               Назад
             </Button>
@@ -102,7 +102,7 @@ const VacancyDetail = () => {
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={saveChanges}>Сохранить</Button>
-            <Button variant="destructive" onClick={() => { deleteVacancy(vacancy.id); navigate('/vacancies'); }}>
+            <Button variant="destructive" onClick={() => { deleteVacancy(vacancy.id); navigate('/dashboard'); }}>
               <Trash2 className="w-4 h-4 mr-2" />Удалить
             </Button>
           </div>

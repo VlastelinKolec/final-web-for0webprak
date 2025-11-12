@@ -91,7 +91,7 @@ const DepartmentAnalytics = () => {
             <h1 className="text-3xl font-bold mb-1">Департамент: {name}</h1>
             <p className="text-muted-foreground">Аналитика по вакансиям и кандидатам департамента</p>
           </div>
-          <Button variant="ghost" onClick={() => navigate('/vacancies')} className="gap-2"><ArrowLeft className="w-4 h-4"/>Назад к вакансиям</Button>
+          <Button variant="ghost" onClick={() => navigate('/dashboard')} className="gap-2"><ArrowLeft className="w-4 h-4"/>Назад</Button>
         </div>
 
         {/* KPIs */}
