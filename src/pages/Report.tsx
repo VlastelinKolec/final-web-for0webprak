@@ -276,7 +276,6 @@ const Report = () => {
                   <div className="space-y-3 text-sm">
                     <div className="flex items-center gap-2"><span className="font-semibold">Итог:</span> {decision === 'Да' ? <span className="flex items-center gap-1 text-green-700"><CheckCircle2 className="w-4 h-4"/>Да</span> : decision}</div>
                     <div className="flex items-center gap-2"><span className="font-semibold">Уровень уверенности:</span> <span className="flex items-center gap-1 text-green-700"><Check className="w-4 h-4"/>Высокий</span></div>
-                    <div className="flex items-center gap-2"><span className="font-semibold">Степень соответствия:</span> {overallMatch}%</div>
                   </div>
                 </div>
                 <div className="border rounded-xl p-6 bg-green-50 border-green-200 space-y-3">
@@ -304,28 +303,7 @@ const Report = () => {
             <h2 className="text-3xl font-bold tracking-tight">Итоговая сводка для руководителя</h2>
             <div className="grid lg:grid-cols-2 gap-6">
               {/* Overall match */}
-              <div className="rounded-2xl border bg-card p-6">
-                <div className="text-lg font-semibold mb-4">Общий процент соответствия:</div>
-                <div className="flex items-center gap-5">
-                  <div className="text-5xl font-extrabold text-green-700 shrink-0">{overallMatch}%</div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-12 h-12 rounded-lg overflow-hidden bg-muted flex items-center justify-center font-semibold">
-                        {interview.candidate.split(' ').map(p=>p[0]).join('')}
-                      </div>
-                      <div className="leading-tight">
-                        <div className="font-semibold text-sm">{interview.candidate}</div>
-                        <div className="text-xs text-muted-foreground">Соответствие</div>
-                      </div>
-                    </div>
-                    <div className="relative">
-                      <div className="h-2 rounded-full bg-green-100" />
-                      <div className="absolute inset-y-0 left-0 h-2 rounded-full bg-green-600" style={{ width: `${overallMatch}%` }} />
-                      <div className="absolute -top-6 right-0 text-xs text-muted-foreground">{overallMatch} / 100</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              {/* Overall match removed per UX request */}
 
               {/* Recheck additionally */}
               <div className="rounded-2xl border bg-card p-6">

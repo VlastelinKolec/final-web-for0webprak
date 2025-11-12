@@ -73,7 +73,11 @@ const Vacancies = () => {
   const filtered = vacancies.filter(v => {
     const matchesSearch = v.title.toLowerCase().includes(search.toLowerCase()) || (v.department || '').toLowerCase().includes(search.toLowerCase());
     const matchesStatus = filterStatus === 'all' ? true : v.status === filterStatus;
-    const matchesStage = filterStage === 'all' ? true : v.candidates.some(c => c.stage === filterStage);
+    // исключаем кандидатов на этапах 'sourced' и 'screening' из логики stage фильтрации и отображения
+    const visibleCandidates = v.candidates.filter(c => !['sourced','screening'].includes(c.stage));
+    const matchesStage = filterStage === 'all'
+      ? true
+      : visibleCandidates.some(c => c.stage === filterStage);
     const matchesRating = ratingMin > 0 ? v.candidates.some(c => (c.rating || 0) >= ratingMin) : true;
     const matchesDepartment = selectedDepartments.length > 0 ? selectedDepartments.includes(v.department || '') : true;
     return matchesSearch && matchesStatus && matchesStage && matchesRating && matchesDepartment;
@@ -203,10 +207,10 @@ const Vacancies = () => {
                   </TableCell>
                   <TableCell>
                     <div className="space-y-2">
-                      {v.candidates.length === 0 && (
-                        <div className="text-xs text-muted-foreground">Нет кандидатов</div>
+                      {v.candidates.filter(c=>!['sourced','screening'].includes(c.stage)).length === 0 && (
+                        <div className="text-xs text-muted-foreground">Нет кандидатов (после интервью)</div>
                       )}
-                      {v.candidates.map(c => (
+                      {v.candidates.filter(c=>!['sourced','screening'].includes(c.stage)).map(c => (
                         <div key={c.id} className="flex items-center justify-between gap-2 bg-muted/50 rounded-md px-2 py-1">
                           <div className="flex flex-col">
                             <button
@@ -243,7 +247,7 @@ const Vacancies = () => {
                           </div>
                         </div>
                       ))}
-                      <Button variant="outline" size="sm" className="w-full justify-center gap-1" onClick={() => addCandidateToVacancy(v.id, { name: 'Новый кандидат', stage: 'sourced', rating: 0, notes: '' })}>
+                      <Button variant="outline" size="sm" className="w-full justify-center gap-1" onClick={() => addCandidateToVacancy(v.id, { name: 'Новый кандидат', stage: 'interview', rating: 0, notes: '' })}>
                         <Users className="w-3 h-3" />
                         Добавить кандидата
                       </Button>

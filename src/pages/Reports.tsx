@@ -26,8 +26,6 @@ const VacancyStatusMap: Record<string, { label: string; color: string }> = {
 };
 
 const stageLabel: Record<string, string> = {
-  sourced: 'Поиск',
-  screening: 'Скрининг',
   interview: 'Интервью',
   offer: 'Оффер',
   hired: 'Нанят',
@@ -49,7 +47,8 @@ const Reports = () => {
   const filtered = vacancies.filter(v => {
     const matchesSearch = v.title.toLowerCase().includes(search.toLowerCase()) || (v.department || '').toLowerCase().includes(search.toLowerCase());
     const matchesStatus = filterStatus === 'all' ? true : v.status === filterStatus;
-    const matchesStage = filterStage === 'all' ? true : v.candidates.some(c => c.stage === filterStage);
+  const visibleCandidates = v.candidates.filter(c => !['sourced','screening'].includes(c.stage));
+  const matchesStage = filterStage === 'all' ? true : visibleCandidates.some(c => c.stage === filterStage);
     const matchesRating = ratingMin > 0 ? v.candidates.some(c => (c.rating || 0) >= ratingMin) : true;
     const matchesDepartment = selectedDepartments.length > 0 ? selectedDepartments.includes(v.department || '') : true;
     return matchesSearch && matchesStatus && matchesStage && matchesRating && matchesDepartment;
@@ -132,8 +131,7 @@ const Reports = () => {
                 <TableHead>Вакансия</TableHead>
                 <TableHead>Статус</TableHead>
                 <TableHead>Кандидаты</TableHead>
-                <TableHead className="text-right">Соответствие (ср./макс.)</TableHead>
-                <TableHead>Обновлено</TableHead>
+                {/* Removed correspondence and updated columns to simplify the reports list */}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -152,20 +150,9 @@ const Reports = () => {
                     <Badge className={`text-white ${VacancyStatusMap[v.status].color}`}>{VacancyStatusMap[v.status].label}</Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="text-xs">{v.candidates.length}</Badge>
+                    <Badge variant="outline" className="text-xs">{v.candidates.filter(c=>!['sourced','screening'].includes(c.stage)).length}</Badge>
                   </TableCell>
-                  <TableCell className="text-right align-top">
-                    {(() => {
-                      const matches = v.candidates
-                        .map(c => c.reportId ? (interviews.find(i => i.id === c.reportId)?.match || 0) : 0)
-                        .filter(n => n > 0);
-                      if (matches.length === 0) return <span className="text-muted-foreground">—</span>;
-                      const avg = Math.round(matches.reduce((a,b)=>a+b,0) / matches.length);
-                      const max = Math.max(...matches);
-                      return <span className="font-semibold">{avg}% <span className="text-muted-foreground">/ {max}%</span></span>;
-                    })()}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">{v.updatedAt}</TableCell>
+                  {/* correspondence and updated date removed */}
                 </TableRow>
               ))}
             </TableBody>

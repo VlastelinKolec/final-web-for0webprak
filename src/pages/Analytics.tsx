@@ -2,6 +2,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useApp } from '@/contexts/AppContext';
 import { useMemo, useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useNavigate } from 'react-router-dom';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
@@ -59,15 +60,7 @@ const Analytics = () => {
   const posLabels = Object.keys(byPosition);
   const posScores = posLabels.map((p) => (byPosition[p].count ? Math.round(byPosition[p].sum / byPosition[p].count) : 0));
 
-  // Stage distribution across all vacancies
-  const stageCounts = filteredVacancies.reduce<Record<string, number>>((acc, v) => {
-    v.candidates.forEach((c) => {
-      acc[c.stage] = (acc[c.stage] || 0) + 1;
-    });
-    return acc;
-  }, {});
-  const stageLabels = ['sourced', 'screening', 'interview', 'offer', 'hired', 'rejected'];
-  const stageData = stageLabels.map((s) => stageCounts[s] || 0);
+  // Stage distribution removed as per request
 
   // Average soft skills (completed interviews only)
   const skillKeys = ['communication', 'leadership', 'problemSolving', 'teamwork', 'adaptability', 'technical', 'emotional'] as const;
@@ -98,6 +91,17 @@ const Analytics = () => {
     .slice(0, 5);
 
   const chartOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } as const;
+  // Modal state for per-person breakdown of a selected soft skill
+  const [skillModalOpen, setSkillModalOpen] = useState(false);
+  const [selectedSkillIndex, setSelectedSkillIndex] = useState<number | null>(null);
+  const perPersonForSelectedSkill = useMemo(() => {
+    if (selectedSkillIndex === null) return [] as { name: string; value: number; interviewId: string }[];
+    const key = skillKeys[selectedSkillIndex];
+    return completed
+      .filter(i => i.skills && typeof (i.skills as any)[key] === 'number')
+      .map(i => ({ name: i.candidate, value: (i.skills as any)[key] as number, interviewId: i.id }))
+      .sort((a,b)=> b.value - a.value);
+  }, [completed, selectedSkillIndex]);
 
   return (
     <DashboardLayout>
@@ -133,7 +137,7 @@ const Analytics = () => {
         </div>
 
         {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 gap-6 mb-8">
           <Card>
             <CardHeader><CardTitle>Средний балл по позициям</CardTitle></CardHeader>
             <CardContent>
@@ -144,45 +148,32 @@ const Analytics = () => {
               )}
             </CardContent>
           </Card>
-          <Card>
-            <CardHeader><CardTitle>Распределение по этапам найма</CardTitle></CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                {stageData.every(v => v === 0) ? (
-                  <div className="h-full flex items-center justify-center text-sm text-muted-foreground">Нет кандидатов на этапах</div>
-                ) : (
-                  <Bar
-                    data={{
-                      labels: stageLabels.map((s) => (
-                        ({
-                          sourced: 'Поиск',
-                          screening: 'Скрининг',
-                          interview: 'Интервью',
-                          offer: 'Оффер',
-                          hired: 'Нанят',
-                          rejected: 'Отказ',
-                        } as Record<string, string>)[s]
-                      )),
-                      datasets: [
-                        { label: 'Кол-во', data: stageData, backgroundColor: 'hsl(95 45% 55% / 0.6)' },
-                      ],
-                    }}
-                    options={chartOptions}
-                  />
-                )}
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
-            <CardHeader><CardTitle>Средние soft skills</CardTitle></CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Средние soft skills</CardTitle>
+            </CardHeader>
             <CardContent>
               {skillsAvg.every(v => v === 0) ? (
                 <div className="h-[320px] flex items-center justify-center text-sm text-muted-foreground">Нет завершенных интервью с оценками навыков</div>
               ) : (
-                <div className="h-[320px]"><Bar data={{ labels: skillLabels, datasets: [{ label: 'Оценка', data: skillsAvg, backgroundColor: 'hsl(200 60% 60% / 0.6)' }] }} options={chartOptions} /></div>
+                <div className="h-[320px]">
+                  <Bar
+                    data={{ labels: skillLabels, datasets: [{ label: 'Оценка', data: skillsAvg, backgroundColor: 'hsl(200 60% 60% / 0.6)', hoverBackgroundColor: 'hsl(200 70% 50% / 0.7)' }] }}
+                    options={{
+                      ...chartOptions,
+                      onClick: (_evt: any, elements: any[]) => {
+                        if (!elements || !elements.length) return;
+                        const idx = elements[0].index;
+                        setSelectedSkillIndex(idx);
+                        setSkillModalOpen(true);
+                      },
+                    }}
+                  />
+                  <p className="mt-2 text-xs text-muted-foreground">Нажмите на столбец, чтобы увидеть распределение по людям</p>
+                </div>
               )}
             </CardContent>
           </Card>
@@ -208,6 +199,46 @@ const Analytics = () => {
             </CardContent>
           </Card>
         </div>
+
+        <Dialog open={skillModalOpen} onOpenChange={setSkillModalOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>
+                {selectedSkillIndex !== null ? `Распределение: ${skillLabels[selectedSkillIndex]}` : 'Распределение по навыку'}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+              {selectedSkillIndex !== null && perPersonForSelectedSkill.length === 0 && (
+                <div className="text-sm text-muted-foreground">Нет данных по людям для этого навыка</div>
+              )}
+              {selectedSkillIndex !== null && perPersonForSelectedSkill.length > 0 && (
+                <table className="w-full text-sm border-collapse">
+                  <thead>
+                    <tr className="text-left border-b">
+                      <th className="py-2 pr-3 font-medium">Кандидат</th>
+                      <th className="py-2 pr-3 font-medium">Оценка</th>
+                      <th className="py-2 font-medium">Отчет</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {perPersonForSelectedSkill.map(row => (
+                      <tr key={row.interviewId} className="border-b last:border-none">
+                        <td className="py-1 pr-3">{row.name}</td>
+                        <td className="py-1 pr-3 font-semibold">{row.value}</td>
+                        <td className="py-1">
+                          <button
+                            onClick={() => navigate(`/report/${row.interviewId}`)}
+                            className="text-primary hover:underline text-xs"
+                          >Открыть</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   );

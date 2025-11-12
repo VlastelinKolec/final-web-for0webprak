@@ -59,7 +59,7 @@ export interface Vacancy {
 
 interface AppContextType {
   interviews: Interview[];
-  addInterview: (interview: Omit<Interview, 'id' | 'date'>) => void;
+  addInterview: (interview: Omit<Interview, 'id' | 'date'>) => string;
   updateInterview: (id: string, updates: Partial<Interview>) => void;
   vacancies: Vacancy[];
   addVacancy: (vacancy: Omit<Vacancy, 'id' | 'createdAt' | 'updatedAt' | 'candidates'>) => void;
@@ -343,6 +343,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         ],
       });
     }, 4000);
+    return newInterview.id;
   };
 
   const updateInterview = (id: string, updates: Partial<Interview>) => {

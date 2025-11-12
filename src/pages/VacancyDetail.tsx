@@ -4,9 +4,8 @@ import { useApp } from '@/contexts/AppContext';
 import type { CandidateStage } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Trash2, Users } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useState } from 'react';
@@ -33,15 +32,8 @@ const stageBadgeClass: Record<CandidateStage, string> = {
 const VacancyDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { vacancies, interviews, updateVacancy, deleteVacancy, updateCandidate, addCandidateToVacancy, deleteCandidate } = useApp();
+  const { vacancies, interviews, deleteVacancy, addCandidateToVacancy, updateCandidate, addInterview } = useApp();
   const vacancy = vacancies.find(v => v.id === id);
-
-  const [title, setTitle] = useState(vacancy?.title || '');
-  const [department, setDepartment] = useState(vacancy?.department || '');
-  const [status, setStatus] = useState<'open' | 'on_hold' | 'closed'>(vacancy?.status || 'open');
-  const [description, setDescription] = useState(vacancy?.description || '');
-  const [requirements, setRequirements] = useState(vacancy?.requirements || '');
-  const [url, setUrl] = useState(vacancy?.url || '');
 
   if (!vacancy) {
     return (
@@ -57,9 +49,7 @@ const VacancyDetail = () => {
     );
   }
 
-  const saveChanges = () => {
-    updateVacancy(vacancy.id, { title, department, status, description, requirements, url });
-  };
+  // no edit/save – display-only
 
   // selection for comparison
   const [compareIds, setCompareIds] = useState<string[]>([]);
@@ -68,6 +58,11 @@ const VacancyDetail = () => {
   const [addOpen, setAddOpen] = useState(false);
   const [newName, setNewName] = useState('');
   const [newResume, setNewResume] = useState('');
+  const [newFile, setNewFile] = useState<File | null>(null);
+  // Фильтр по этапу (статусу) кандидата: интервью, оффер, отказ, нанят
+  const [stageFilter, setStageFilter] = useState<CandidateStage | 'all'>('all');
+  // Поиск по фамилии (берем последнюю часть имени)
+  const [surnameQuery, setSurnameQuery] = useState('');
 
   const getMatch = (candidateId: string) => {
     const c = vacancy.candidates.find(x => x.id === candidateId);
@@ -80,6 +75,22 @@ const VacancyDetail = () => {
     const bm = getMatch(b.id);
     return bm - am;
   });
+
+  // Убираем ранние этапы (Поиск, Скрининг)
+  let filteredCandidates = sortedCandidates.filter(c => !['sourced','screening'].includes(c.stage));
+  // Фильтр по выбранному этапу если не "all"
+  if (stageFilter !== 'all') {
+    filteredCandidates = filteredCandidates.filter(c => c.stage === stageFilter);
+  }
+  // Поиск по фамилии (последнее слово в имени)
+  if (surnameQuery.trim()) {
+    const q = surnameQuery.trim().toLowerCase();
+    filteredCandidates = filteredCandidates.filter(c => {
+      const parts = c.name.split(/\s+/);
+      const last = parts[parts.length - 1].toLowerCase();
+      return last.includes(q);
+    });
+  }
 
   const stages = ['sourced','screening','interview','offer','hired','rejected'] as const;
 
@@ -101,132 +112,75 @@ const VacancyDetail = () => {
             <Badge className="text-white bg-primary">{vacancy.status}</Badge>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={saveChanges}>Сохранить</Button>
             <Button variant="destructive" onClick={() => { deleteVacancy(vacancy.id); navigate('/dashboard'); }}>
               <Trash2 className="w-4 h-4 mr-2" />Удалить
             </Button>
           </div>
         </div>
-
-  {/* Edit form */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="space-y-4 bg-card border border-border rounded-xl p-6">
-            <h2 className="text-xl font-semibold mb-2">Основная информация</h2>
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Название" />
-            <Input value={department} onChange={(e) => setDepartment(e.target.value)} placeholder="Департамент" />
-            <Select value={status} onValueChange={(v: 'open' | 'on_hold' | 'closed') => setStatus(v)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Статус" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="open">Открыта</SelectItem>
-                <SelectItem value="on_hold">Пауза</SelectItem>
-                <SelectItem value="closed">Закрыта</SelectItem>
-              </SelectContent>
-            </Select>
-            <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="Ссылка на вакансию (https://...)" type="url" />
-            <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Описание" />
-            <Textarea value={requirements} onChange={(e) => setRequirements(e.target.value)} placeholder="Требования" />
-            {url && (
-              <a href={url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">Открыть вакансию</a>
+        {/* Top toolbar: compare + add and a small link to vacancy */}
+        <div className="flex items-center justify-between gap-3 bg-card border border-border rounded-xl p-4">
+          <div className="text-sm">
+            {vacancy.url ? (
+              <a href={vacancy.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Открыть вакансию</a>
+            ) : (
+              <span className="text-muted-foreground">Ссылка на вакансию не указана</span>
             )}
           </div>
-
-          <div className="space-y-4 bg-card border border-border rounded-xl p-6">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-xl font-semibold flex items-center gap-2">Сравнение <Badge variant="outline">{vacancy.candidates.length}</Badge></h2>
-              <div className="flex items-center gap-2">
-                <Button disabled={compareIds.length < 2} onClick={() => setCompareOpen(true)} size="sm" variant="secondary">Сравнить {compareIds.length >=2 ? `(${compareIds.length})` : ''}</Button>
-                <Button variant="outline" size="sm" className="gap-2" onClick={()=> setAddOpen(true)}>
-                  <Users className="w-3 h-3" /> Добавить кандидата
-                </Button>
-              </div>
+          <div className="flex items-center gap-2 flex-wrap justify-end">
+            <div className="flex items-center gap-2">
+              <Input
+                placeholder="Поиск по фамилии"
+                value={surnameQuery}
+                onChange={(e)=> setSurnameQuery(e.target.value)}
+                className="h-8 w-44 text-xs"
+              />
+              <Select value={stageFilter} onValueChange={(v:any)=> setStageFilter(v)}>
+                <SelectTrigger className="h-8 w-40 text-xs" title="Фильтр по статусу">
+                  <SelectValue placeholder="Статус" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Все</SelectItem>
+                  <SelectItem value="interview">Интервью</SelectItem>
+                  <SelectItem value="offer">Оффер</SelectItem>
+                  <SelectItem value="rejected">Отказ</SelectItem>
+                  <SelectItem value="hired">Нанят</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <div className="text-xs text-muted-foreground">Выберите двух кандидатов, чтобы сравнить их отчёты. Подробные данные и управление этапами находятся в Канбане ниже.</div>
-            <div className="space-y-2 max-h-[460px] overflow-y-auto pr-1">
-              {sortedCandidates.map((c) => (
-                <label key={c.id} className="flex items-center gap-3 rounded-md border bg-white/70 px-3 py-2 text-sm">
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4"
-                    checked={compareIds.includes(c.id)}
-                    onChange={(e)=>{
-                      setCompareIds(prev => e.target.checked ? [...prev, c.id] : prev.filter(id=>id!==c.id));
-                    }}
-                  />
-                  <div className="flex-1 flex items-center gap-2 min-w-0">
-                    <span className="truncate font-medium">{c.name}</span>
-                    {c.reportId && (
-                      <span className="text-[11px] font-semibold text-green-700 bg-green-100 rounded-full px-2 py-0.5">{getMatch(c.id)}%</span>
-                    )}
-                    <span className={`ml-auto rounded-full px-2 py-0.5 text-[10px] font-semibold ${stageBadgeClass[c.stage]}`}>{stageLabel[c.stage]}</span>
-                  </div>
-                </label>
-              ))}
-              {vacancy.candidates.length === 0 && (
-                <div className="text-xs text-muted-foreground">Нет кандидатов</div>
-              )}
-            </div>
+            <Button disabled={compareIds.length < 2} onClick={() => setCompareOpen(true)} size="sm" variant="secondary">Сравнить {compareIds.length >=2 ? `(${compareIds.length})` : ''}</Button>
+            <Button variant="outline" size="sm" className="gap-2" onClick={()=> setAddOpen(true)}>
+              <Users className="w-3 h-3" /> Добавить кандидата
+            </Button>
           </div>
         </div>
 
-        {/* Full-width Kanban below description */}
+        {/* Candidate list (simple view) */}
         <div className="space-y-3">
-          <h2 className="text-xl font-semibold">Воронка кандидатов (канбан)</h2>
-          {/* Responsive: horizontally scroll when too many columns */}
-          <div className="grid gap-4 xl:grid-cols-6 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 overflow-x-auto pb-2">
-            {stages.map(stageKey => {
-              const stageItems = sortedCandidates.filter(c=>c.stage===stageKey).sort((a,b)=>getMatch(b.id)-getMatch(a.id));
-              const isOver = dragOver === stageKey;
-              return (
-                <div
-                  key={stageKey}
-                  className={`rounded-lg border bg-white ${isOver ? 'ring-2 ring-primary' : ''}`}
-                  onDragOver={(e)=>{ e.preventDefault(); setDragOver(stageKey); }}
-                  onDragEnter={(e)=>{ e.preventDefault(); setDragOver(stageKey); }}
-                  onDragLeave={()=> setDragOver(null)}
-                  onDrop={(e)=>{
-                    const id = e.dataTransfer.getData('text/plain');
-                    if (id) handleDropOnStage(stageKey as CandidateStage, id);
-                  }}
-                >
-                  <div className="px-3 py-2 border-b bg-muted/50 flex items-center justify-between sticky top-0 z-10">
-                    <span className="text-sm font-semibold">{stageLabel[stageKey]}</span>
-                    <Badge variant="outline" className="text-[10px]">{stageItems.length}</Badge>
-                  </div>
-                  <div className="p-3 space-y-2 max-h-[28rem] overflow-y-auto">
-                    {stageItems.length === 0 && (
-                      <div className="text-xs text-muted-foreground">Пусто</div>
-                    )}
-                    {stageItems.map(c => (
-                      <div
-                        key={c.id}
-                        className="rounded-md border bg-muted/20 p-2 text-sm cursor-move"
-                        draggable
-                        onDragStart={(e)=>{ e.dataTransfer.setData('text/plain', c.id); e.dataTransfer.effectAllowed = 'move'; }}
-                      >
-                        <div className="flex items-center justify-between gap-2">
-                          <button className="font-medium hover:underline text-left" onClick={()=>{ if (c.reportId) navigate(`/report/${c.reportId}`); }}>{c.name}</button>
-                          {c.reportId && (
-                            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-green-100 text-green-700">{getMatch(c.id)}%</span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className={`text-[10px] px-2 py-0.5 rounded-full ${stageBadgeClass[c.stage]}`}>{stageLabel[c.stage]}</span>
-                          {typeof c.rating === 'number' && c.rating > 0 && (
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border">{c.rating}</span>
-                          )}
-                          {c.resumeUrl && (
-                            <a href={c.resumeUrl} target="_blank" rel="noopener noreferrer" className="text-[11px] underline text-primary">Резюме</a>
-                          )}
-                        </div>
-                        {c.notes && <div className="text-[11px] text-muted-foreground mt-1 line-clamp-2">{c.notes}</div>}
-                      </div>
-                    ))}
+          <h2 className="text-xl font-semibold">Кандидаты</h2>
+          <div className="space-y-2 bg-card border border-border rounded-xl p-4">
+            {filteredCandidates.map(c => (
+              <div key={c.id} className="flex items-center justify-between gap-4 p-3 rounded-md border bg-white/70 hover:bg-muted/40 transition-colors cursor-pointer" onClick={() => { if (c.reportId) navigate(`/report/${c.reportId}`); }}>
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-md bg-muted flex items-center justify-center font-semibold">{c.name.split(' ').map(p=>p[0]).join('')}</div>
+                  <div className="min-w-0">
+                    <div className="font-medium truncate">{c.name}</div>
+                    <div className="text-xs text-muted-foreground">{c.notes}</div>
                   </div>
                 </div>
-              );
-            })}
+                <div className="flex items-center gap-3">
+                  <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${stageBadgeClass[c.stage]}`}>{stageLabel[c.stage]}</span>
+                  {c.reportId ? (
+                    <span className="text-[11px] font-semibold text-green-700 bg-green-100 rounded-full px-2 py-0.5">{getMatch(c.id)}%</span>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">Нет отчёта</span>
+                  )}
+                  <input type="checkbox" className="h-4 w-4" onClick={(e)=> e.stopPropagation()} checked={compareIds.includes(c.id)} onChange={(e)=>{
+                    setCompareIds(prev => e.target.checked ? [...prev, c.id] : prev.filter(id=>id!==c.id));
+                  }} />
+                </div>
+              </div>
+            ))}
+            {filteredCandidates.length === 0 && <div className="text-sm text-muted-foreground">Нет кандидатов</div>}
           </div>
         </div>
 
@@ -268,12 +222,35 @@ const VacancyDetail = () => {
             <div className="space-y-3">
               <Input value={newName} onChange={(e)=>setNewName(e.target.value)} placeholder="Имя и фамилия" />
               <Input value={newResume} onChange={(e)=>setNewResume(e.target.value)} placeholder="Ссылка на резюме (https://...)" type="url" />
+              <div className="border-2 border-dashed border-border rounded-md p-4 text-center cursor-pointer hover:border-primary transition-colors">
+                <input
+                  type="file"
+                  id="candidateFile"
+                  className="hidden"
+                  accept="audio/*,video/*,application/pdf"
+                  onChange={(e) => setNewFile(e.target.files?.[0] || null)}
+                />
+                <label htmlFor="candidateFile" className="text-sm text-muted-foreground cursor-pointer">
+                  {newFile ? (
+                    <span className="font-medium">{newFile.name} ({(newFile.size/1024/1024).toFixed(2)} МБ)</span>
+                  ) : (
+                    'Прикрепить файл интервью или резюме'
+                  )}
+                </label>
+              </div>
               <div className="flex justify-end gap-2">
-                <Button variant="ghost" onClick={()=> setAddOpen(false)}>Отмена</Button>
+                <Button variant="ghost" onClick={()=> { setAddOpen(false); }}>Отмена</Button>
                 <Button onClick={()=>{
                   const name = newName.trim() || 'Кандидат';
-                  addCandidateToVacancy(vacancy.id, { name, stage: 'sourced', rating: 0, notes: '', resumeUrl: newResume || undefined });
-                  setNewName(''); setNewResume(''); setAddOpen(false);
+                  // Создаем интервью сразу при добавлении
+                  const reportId = addInterview({
+                    candidate: name,
+                    position: vacancy.title,
+                    status: 'processing',
+                    attachments: newFile ? [{ name: newFile.name, size: newFile.size, type: newFile.type }] : undefined,
+                  });
+                  addCandidateToVacancy(vacancy.id, { name, stage: 'interview', rating: 0, notes: '', resumeUrl: newResume || undefined, reportId });
+                  setNewName(''); setNewResume(''); setNewFile(null); setAddOpen(false);
                 }}>Добавить</Button>
               </div>
             </div>
