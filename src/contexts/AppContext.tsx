@@ -52,6 +52,7 @@ export interface Vacancy {
   updatedAt: string;
   description?: string;
   requirements?: string;
+  url?: string; // external job posting link
   candidates: CandidateProfile[];
 }
 
@@ -196,6 +197,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     updatedAt: '2025-10-28',
     description: 'Разработка и поддержка фронтенд-части высоконагруженных сервисов',
     requirements: 'React, TypeScript, Vite, Tailwind, архитектура приложений',
+    url: 'https://example.com/jobs/senior-frontend-developer',
     candidates: [
       {
         id: 'c1',
@@ -214,6 +216,19 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         rating: 0,
         notes: 'Ожидает собеседование',
       },
+      // Mock more candidates across all stages to make the board look populated
+      { id: 'c10', name: 'Егор Кузнецов', stage: 'sourced', status: 'active', notes: 'Отлик из базы' },
+      { id: 'c11', name: 'Мария Орлова', stage: 'sourced', status: 'active', notes: 'Проходит тестовое' },
+      { id: 'c12', name: 'Сергей Фомин', stage: 'screening', status: 'active', notes: 'Скрининг пройден' },
+      { id: 'c13', name: 'Алина Романова', stage: 'screening', status: 'active', notes: 'Запросили доп. инфо' },
+      { id: 'c14', name: 'Роман Ким', stage: 'interview', status: 'active', rating: 82, reportId: '3' },
+      { id: 'c15', name: 'Татьяна Белова', stage: 'interview', status: 'active', notes: 'Ждем финал' },
+      { id: 'c16', name: 'Денис Попов', stage: 'offer', status: 'active', notes: 'Оффер отправлен' },
+      { id: 'c17', name: 'Иван Гусев', stage: 'offer', status: 'active', notes: 'Торг по зарплате' },
+      { id: 'c18', name: 'Кирилл Захаров', stage: 'hired', status: 'archived', notes: 'Выход через 2 недели' },
+      { id: 'c19', name: 'Виктория Егорова', stage: 'hired', status: 'archived' },
+      { id: 'c20', name: 'Артем Соколов', stage: 'rejected', status: 'archived', notes: 'Не подошел по опыту' },
+      { id: 'c21', name: 'Наталья Лебедева', stage: 'rejected', status: 'archived', notes: 'Отказ соискателя' },
     ],
   },
   {
@@ -223,6 +238,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     status: 'on_hold',
     createdAt: '2025-10-10',
     updatedAt: '2025-10-27',
+    url: 'https://example.com/jobs/product-manager',
     candidates: [
       {
         id: 'c3',
@@ -232,6 +248,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         rating: 92,
         reportId: '2',
       },
+      { id: 'c22', name: 'Екатерина Зайцева', stage: 'sourced', status: 'active' },
+      { id: 'c23', name: 'Андрей Павлов', stage: 'screening', status: 'active' },
+      { id: 'c24', name: 'Светлана Ковалёва', stage: 'interview', status: 'active' },
+      { id: 'c25', name: 'Павел Егоров', stage: 'rejected', status: 'archived' },
     ],
   }]);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
@@ -312,6 +332,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       status: vacancy.status,
       description: vacancy.description,
       requirements: vacancy.requirements,
+      url: vacancy.url,
       createdAt: now,
       updatedAt: now,
       candidates: [],

@@ -41,6 +41,7 @@ const VacancyDetail = () => {
   const [status, setStatus] = useState<'open' | 'on_hold' | 'closed'>(vacancy?.status || 'open');
   const [description, setDescription] = useState(vacancy?.description || '');
   const [requirements, setRequirements] = useState(vacancy?.requirements || '');
+  const [url, setUrl] = useState(vacancy?.url || '');
 
   if (!vacancy) {
     return (
@@ -57,7 +58,7 @@ const VacancyDetail = () => {
   }
 
   const saveChanges = () => {
-    updateVacancy(vacancy.id, { title, department, status, description, requirements });
+    updateVacancy(vacancy.id, { title, department, status, description, requirements, url });
   };
 
   // selection for comparison
@@ -120,8 +121,12 @@ const VacancyDetail = () => {
                 <SelectItem value="closed">Закрыта</SelectItem>
               </SelectContent>
             </Select>
+            <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="Ссылка на вакансию (https://...)" type="url" />
             <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Описание" />
             <Textarea value={requirements} onChange={(e) => setRequirements(e.target.value)} placeholder="Требования" />
+            {url && (
+              <a href={url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">Открыть вакансию</a>
+            )}
           </div>
 
           <div className="space-y-4 bg-card border border-border rounded-xl p-6">
