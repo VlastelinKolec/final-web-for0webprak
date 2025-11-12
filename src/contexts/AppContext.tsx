@@ -9,6 +9,7 @@ export interface Interview {
   score?: number;
   confidence?: number; // 0-100
   match?: number; // % соответствия 0-100
+  attachments?: Array<{ name: string; size: number; type: string }>; // загруженные файлы отчета
   skills?: {
     communication: number;
     leadership: number;

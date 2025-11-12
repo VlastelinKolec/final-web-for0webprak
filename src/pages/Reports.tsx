@@ -1,14 +1,13 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/DashboardLayout';
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuCheckboxItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Slider } from '@/components/ui/slider';
-import { Plus, Pencil, Trash2, Users, Filter } from 'lucide-react';
+import { Filter, Upload, Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import {
   Table,
   TableBody,
@@ -18,9 +17,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Separator } from '@/components/ui/separator';
-import type { CandidateStage, VacancyStatus } from '@/contexts/AppContext';
+import UploadModal from '@/components/UploadModal';
 
 const VacancyStatusMap: Record<string, { label: string; color: string }> = {
   open: { label: 'Открыта', color: 'bg-green-500' },
@@ -37,38 +34,17 @@ const stageLabel: Record<string, string> = {
   rejected: 'Отказ',
 };
 
-const Vacancies = () => {
-  const { vacancies, interviews, addVacancy, updateVacancy, deleteVacancy, addCandidateToVacancy, updateCandidate, deleteCandidate } = useApp();
+const Reports = () => {
   const navigate = useNavigate();
-  const [modalOpen, setModalOpen] = useState(false);
-  // Use 'all' sentinel instead of empty string to avoid Radix Select crash (value cannot be empty)
+  const { vacancies, interviews, addCandidateToVacancy } = useApp();
+  const [uploadOpen, setUploadOpen] = useState(false);
+
+  // Filters
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterStage, setFilterStage] = useState<string>('all');
   const [search, setSearch] = useState('');
   const [ratingMin, setRatingMin] = useState<number>(0);
   const [selectedDepartments, setSelectedDepartments] = useState<string[]>([]);
-
-  // Form state
-  const [title, setTitle] = useState('');
-  const [department, setDepartment] = useState('');
-  const [status, setStatus] = useState<VacancyStatus>('open');
-  const [description, setDescription] = useState('');
-  const [requirements, setRequirements] = useState('');
-
-  const resetForm = () => {
-    setTitle('');
-    setDepartment('');
-    setStatus('open');
-    setDescription('');
-    setRequirements('');
-  };
-
-  const handleCreateVacancy = () => {
-    if (!title.trim()) return;
-    addVacancy({ title, department, status, description, requirements });
-    resetForm();
-    setModalOpen(false);
-  };
 
   const filtered = vacancies.filter(v => {
     const matchesSearch = v.title.toLowerCase().includes(search.toLowerCase()) || (v.department || '').toLowerCase().includes(search.toLowerCase());
@@ -84,44 +60,18 @@ const Vacancies = () => {
       <div className="p-8">
         <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h1 className="text-3xl font-bold mb-1">Вакансии</h1>
-            <p className="text-muted-foreground text-sm">Управление вакансиями и профилями кандидатов</p>
+            <h1 className="text-3xl font-bold mb-1">Отчеты</h1>
+            <p className="text-muted-foreground text-sm">Вакансии со сводной статистикой, переход к ранжированным кандидатам</p>
           </div>
           <div className="flex gap-2">
-            <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-              <DialogTrigger asChild>
-                <Button className="gap-2">
-                  <Plus className="w-4 h-4" />
-                  Новая вакансия
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Создать вакансию</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <Input placeholder="Название" value={title} onChange={e => setTitle(e.target.value)} />
-                  <Input placeholder="Департамент" value={department} onChange={e => setDepartment(e.target.value)} />
-                  <Select value={status} onValueChange={(v: VacancyStatus) => setStatus(v)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Статус" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="open">Открыта</SelectItem>
-                      <SelectItem value="on_hold">Пауза</SelectItem>
-                      <SelectItem value="closed">Закрыта</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Textarea placeholder="Описание" value={description} onChange={e => setDescription(e.target.value)} />
-                  <Textarea placeholder="Требования" value={requirements} onChange={e => setRequirements(e.target.value)} />
-                  <Button onClick={handleCreateVacancy} className="w-full">Создать</Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+            <Button className="gap-2" onClick={() => setUploadOpen(true)}>
+              <Upload className="w-4 h-4" />
+              Загрузить отчет
+            </Button>
           </div>
         </div>
 
-  <div className="flex flex-wrap gap-3 mb-6 items-center sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-3 z-10 border-b border-border">
+        <div className="flex flex-wrap gap-3 mb-6 items-center sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-3 z-10 border-b border-border">
           <div className="relative">
             <Input placeholder="Поиск" value={search} onChange={e => setSearch(e.target.value)} className="w-56" />
           </div>
@@ -202,52 +152,7 @@ const Vacancies = () => {
                     <Badge className={`text-white ${VacancyStatusMap[v.status].color}`}>{VacancyStatusMap[v.status].label}</Badge>
                   </TableCell>
                   <TableCell>
-                    <div className="space-y-2">
-                      {v.candidates.length === 0 && (
-                        <div className="text-xs text-muted-foreground">Нет кандидатов</div>
-                      )}
-                      {v.candidates.map(c => (
-                        <div key={c.id} className="flex items-center justify-between gap-2 bg-muted/50 rounded-md px-2 py-1">
-                          <div className="flex flex-col">
-                            <button
-                              type="button"
-                              className="text-left text-sm font-medium hover:underline"
-                              onClick={(e) => { e.stopPropagation(); if (c.reportId) navigate(`/report/${c.reportId}`); }}
-                            >{c.name}</button>
-                            <span className="text-[10px] text-muted-foreground">{stageLabel[c.stage]}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            {typeof c.rating === 'number' && c.rating > 0 && (
-                              <span className="text-xs font-semibold">{c.rating}</span>
-                            )}
-                            {c.reportId && (
-                              <Badge
-                                variant="outline"
-                                className="text-[10px] cursor-pointer hover:bg-muted"
-                                onClick={(e) => { e.stopPropagation(); navigate(`/report/${c.reportId}`); }}
-                              >Отчет</Badge>
-                            )}
-                            <Select value={c.stage} onValueChange={(val: CandidateStage) => updateCandidate(v.id, c.id, { stage: val })}>
-                              <SelectTrigger className="h-7 w-28 text-[10px]">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {Object.entries(stageLabel).map(([k, v]) => (
-                                  <SelectItem key={k} value={k}>{v}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => deleteCandidate(v.id, c.id)}>
-                              <Trash2 className="w-3 h-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                      <Button variant="outline" size="sm" className="w-full justify-center gap-1" onClick={() => addCandidateToVacancy(v.id, { name: 'Новый кандидат', stage: 'sourced', rating: 0, notes: '' })}>
-                        <Users className="w-3 h-3" />
-                        Добавить кандидата
-                      </Button>
-                    </div>
+                    <Badge variant="outline" className="text-xs">{v.candidates.length}</Badge>
                   </TableCell>
                   <TableCell className="text-right align-top">
                     {(() => {
@@ -267,8 +172,10 @@ const Vacancies = () => {
           </Table>
         </div>
       </div>
+
+      <UploadModal open={uploadOpen} onOpenChange={setUploadOpen} />
     </DashboardLayout>
   );
 };
 
-export default Vacancies;
+export default Reports;

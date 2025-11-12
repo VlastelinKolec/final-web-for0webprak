@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Share2, Download, CheckCircle2, AlertTriangle, Check, X, ArrowRight } from 'lucide-react';
+import React from 'react';
+import { ArrowLeft, Share2, Download, CheckCircle2, AlertTriangle, Check, X, ArrowRight, Paperclip } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -165,6 +166,15 @@ const Report = () => {
     navigator.clipboard.writeText(link).then(() => toast.success('Ссылка скопирована'));
   };
 
+  const [files, setFiles] = React.useState<File[]>([]);
+  const handleAttach = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = Array.from(e.target.files || []);
+    if (selected.length) {
+      setFiles(prev => [...prev, ...selected]);
+      toast.success('Файл добавлен', { description: selected.map(f=>f.name).join(', ') });
+    }
+  };
+
   // Derived collections
   const strengths = (interview.insights || []).slice(0, 4);
   const weaknesses = (interview.risks || []).slice(0, 3);
@@ -209,6 +219,10 @@ const Report = () => {
                 <Button size="icon" variant="outline" className="rounded-full h-11 w-11 bg-muted/30 hover:bg-muted" onClick={copyLink} aria-label="Скопировать ссылку">
                   <Share2 className="w-5 h-5" />
                 </Button>
+                <label className="rounded-full h-11 w-11 bg-muted/30 hover:bg-muted flex items-center justify-center border border-border cursor-pointer" aria-label="Прикрепить файл">
+                  <Paperclip className="w-5 h-5" />
+                  <input type="file" multiple onChange={handleAttach} className="hidden" />
+                </label>
               </div>
             </div>
 
@@ -358,6 +372,21 @@ const Report = () => {
               </div>
             </div>
           </div>
+
+          {/* Attachments list */}
+          {files.length > 0 && (
+            <div className="space-y-3">
+              <h3 className="text-lg font-semibold">Прикрепленные файлы</h3>
+              <ul className="space-y-2 text-sm">
+                {files.map(f => (
+                  <li key={f.name} className="flex items-center justify-between rounded-md border p-3 bg-card">
+                    <span className="truncate max-w-xs" title={f.name}>{f.name}</span>
+                    <span className="text-xs text-muted-foreground">{(f.size/1024/1024).toFixed(2)} МБ</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {/* Skill map block - matches provided mock */}
           <div className="space-y-6">

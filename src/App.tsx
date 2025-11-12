@@ -7,6 +7,7 @@ import { AppProvider, useApp } from "./contexts/AppContext";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import Reports from "./pages/Reports";
 import Report from "./pages/Report";
 import Vacancies from "./pages/Vacancies";
 import VacancyDetail from "./pages/VacancyDetail";
@@ -36,7 +37,7 @@ const App = () => (
               path="/dashboard"
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <Reports />
                 </ProtectedRoute>
               }
             />

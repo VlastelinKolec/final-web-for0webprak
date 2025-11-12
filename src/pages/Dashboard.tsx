@@ -102,14 +102,14 @@ const Dashboard = () => {
       const meetsMatch = typeof interview.match === 'number' ? interview.match >= minMatch : minMatch === 0;
       return matchesSearch && matchesStatus && matchesPosition && meetsScore && meetsConfidence && meetsMatch;
     })
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    .sort((a, b) => (b.match || 0) - (a.match || 0));
 
   return (
     <DashboardLayout>
       <div className="p-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">История отчетов</h1>
-          <p className="text-muted-foreground">Управляйте и просматривайте отчеты по интервью</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Отчеты</h1>
+          <p className="text-muted-foreground">Список всех интервью, отсортирован по уровню соответствия</p>
         </div>
 
   <div className="flex items-center gap-4 mb-6 sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 py-4 z-10 border-b border-border">

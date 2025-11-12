@@ -9,7 +9,7 @@ const Login = () => {
 
   const handleLogin = () => {
     login();
-    navigate('/analytics');
+    navigate('/dashboard');
   };
 
   return (
