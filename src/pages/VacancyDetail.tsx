@@ -65,6 +65,9 @@ const VacancyDetail = () => {
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [compareOpen, setCompareOpen] = useState(false);
   const [dragOver, setDragOver] = useState<CandidateStage | null>(null);
+  const [addOpen, setAddOpen] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newResume, setNewResume] = useState('');
 
   const getMatch = (candidateId: string) => {
     const c = vacancy.candidates.find(x => x.id === candidateId);
@@ -134,12 +137,7 @@ const VacancyDetail = () => {
               <h2 className="text-xl font-semibold flex items-center gap-2">Сравнение <Badge variant="outline">{vacancy.candidates.length}</Badge></h2>
               <div className="flex items-center gap-2">
                 <Button disabled={compareIds.length < 2} onClick={() => setCompareOpen(true)} size="sm" variant="secondary">Сравнить {compareIds.length >=2 ? `(${compareIds.length})` : ''}</Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-2"
-                  onClick={() => addCandidateToVacancy(vacancy.id, { name: 'Новый кандидат', stage: 'sourced', rating: 0, notes: '' })}
-                >
+                <Button variant="outline" size="sm" className="gap-2" onClick={()=> setAddOpen(true)}>
                   <Users className="w-3 h-3" /> Добавить кандидата
                 </Button>
               </div>
@@ -218,6 +216,9 @@ const VacancyDetail = () => {
                           {typeof c.rating === 'number' && c.rating > 0 && (
                             <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border">{c.rating}</span>
                           )}
+                          {c.resumeUrl && (
+                            <a href={c.resumeUrl} target="_blank" rel="noopener noreferrer" className="text-[11px] underline text-primary">Резюме</a>
+                          )}
                         </div>
                         {c.notes && <div className="text-[11px] text-muted-foreground mt-1 line-clamp-2">{c.notes}</div>}
                       </div>
@@ -254,6 +255,27 @@ const VacancyDetail = () => {
                   </div>
                 );
               })}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add candidate dialog */}
+        <Dialog open={addOpen} onOpenChange={setAddOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Новый кандидат</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              <Input value={newName} onChange={(e)=>setNewName(e.target.value)} placeholder="Имя и фамилия" />
+              <Input value={newResume} onChange={(e)=>setNewResume(e.target.value)} placeholder="Ссылка на резюме (https://...)" type="url" />
+              <div className="flex justify-end gap-2">
+                <Button variant="ghost" onClick={()=> setAddOpen(false)}>Отмена</Button>
+                <Button onClick={()=>{
+                  const name = newName.trim() || 'Кандидат';
+                  addCandidateToVacancy(vacancy.id, { name, stage: 'sourced', rating: 0, notes: '', resumeUrl: newResume || undefined });
+                  setNewName(''); setNewResume(''); setAddOpen(false);
+                }}>Добавить</Button>
+              </div>
             </div>
           </DialogContent>
         </Dialog>

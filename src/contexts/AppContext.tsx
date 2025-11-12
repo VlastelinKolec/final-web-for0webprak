@@ -40,6 +40,7 @@ export interface CandidateProfile {
   status: 'active' | 'archived';
   rating?: number; // 0-100
   notes?: string;
+  resumeUrl?: string; // ссылка на резюме
   reportId?: string; // link to Interview.id if a report exists
 }
 
@@ -206,6 +207,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         status: 'active',
         rating: 87,
         notes: 'Сильный Т-шейп, хорошая коммуникация',
+        resumeUrl: 'https://example.com/resumes/anna-smirnova.pdf',
         reportId: '1',
       },
       {
@@ -215,20 +217,21 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         status: 'active',
         rating: 0,
         notes: 'Ожидает собеседование',
+        resumeUrl: 'https://example.com/resumes/mikhail-ivanov.pdf',
       },
       // Mock more candidates across all stages to make the board look populated
       { id: 'c10', name: 'Егор Кузнецов', stage: 'sourced', status: 'active', notes: 'Отлик из базы' },
       { id: 'c11', name: 'Мария Орлова', stage: 'sourced', status: 'active', notes: 'Проходит тестовое' },
       { id: 'c12', name: 'Сергей Фомин', stage: 'screening', status: 'active', notes: 'Скрининг пройден' },
       { id: 'c13', name: 'Алина Романова', stage: 'screening', status: 'active', notes: 'Запросили доп. инфо' },
-      { id: 'c14', name: 'Роман Ким', stage: 'interview', status: 'active', rating: 82, reportId: '3' },
+      { id: 'c14', name: 'Роман Ким', stage: 'interview', status: 'active', rating: 82, reportId: '3', resumeUrl: 'https://example.com/resumes/roman-kim.pdf' },
       { id: 'c15', name: 'Татьяна Белова', stage: 'interview', status: 'active', notes: 'Ждем финал' },
-      { id: 'c16', name: 'Денис Попов', stage: 'offer', status: 'active', notes: 'Оффер отправлен' },
-      { id: 'c17', name: 'Иван Гусев', stage: 'offer', status: 'active', notes: 'Торг по зарплате' },
-      { id: 'c18', name: 'Кирилл Захаров', stage: 'hired', status: 'archived', notes: 'Выход через 2 недели' },
+      { id: 'c16', name: 'Денис Попов', stage: 'offer', status: 'active', notes: 'Оффер отправлен', reportId: '1' },
+      { id: 'c17', name: 'Иван Гусев', stage: 'offer', status: 'active', notes: 'Торг по зарплате', reportId: '1' },
+      { id: 'c18', name: 'Кирилл Захаров', stage: 'hired', status: 'archived', notes: 'Выход через 2 недели', reportId: '1' },
       { id: 'c19', name: 'Виктория Егорова', stage: 'hired', status: 'archived' },
-      { id: 'c20', name: 'Артем Соколов', stage: 'rejected', status: 'archived', notes: 'Не подошел по опыту' },
-      { id: 'c21', name: 'Наталья Лебедева', stage: 'rejected', status: 'archived', notes: 'Отказ соискателя' },
+      { id: 'c20', name: 'Артем Соколов', stage: 'rejected', status: 'archived', notes: 'Не подошел по опыту', reportId: '3' },
+      { id: 'c21', name: 'Наталья Лебедева', stage: 'rejected', status: 'archived', notes: 'Отказ соискателя', reportId: '5' },
     ],
   },
   {
@@ -250,8 +253,55 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       },
       { id: 'c22', name: 'Екатерина Зайцева', stage: 'sourced', status: 'active' },
       { id: 'c23', name: 'Андрей Павлов', stage: 'screening', status: 'active' },
-      { id: 'c24', name: 'Светлана Ковалёва', stage: 'interview', status: 'active' },
-      { id: 'c25', name: 'Павел Егоров', stage: 'rejected', status: 'archived' },
+      { id: 'c24', name: 'Светлана Ковалёва', stage: 'interview', status: 'active', reportId: '2' },
+      { id: 'c25', name: 'Павел Егоров', stage: 'rejected', status: 'archived', reportId: '2' },
+    ],
+  },
+  {
+    id: 'v3',
+    title: 'UX/UI Designer',
+    department: 'Design',
+    status: 'open',
+    createdAt: '2025-10-15',
+    updatedAt: '2025-10-28',
+    url: 'https://example.com/jobs/ux-ui-designer',
+    candidates: [
+      { id: 'c30', name: 'Елена Петрова', stage: 'interview', status: 'active', rating: 78, reportId: '3' },
+      { id: 'c31', name: 'Алла Кузьмина', stage: 'sourced', status: 'active' },
+      { id: 'c32', name: 'Дарья Богданова', stage: 'screening', status: 'active' },
+      { id: 'c33', name: 'Галина Карпова', stage: 'offer', status: 'active', reportId: '3' },
+      { id: 'c34', name: 'Валерия Сафонова', stage: 'rejected', status: 'archived', reportId: '3' },
+    ],
+  },
+  {
+    id: 'v4',
+    title: 'Backend Developer',
+    department: 'R&D',
+    status: 'open',
+    createdAt: '2025-10-12',
+    updatedAt: '2025-10-29',
+    url: 'https://example.com/jobs/backend-developer',
+    candidates: [
+      { id: 'c40', name: 'Илья Котов', stage: 'sourced', status: 'active' },
+      { id: 'c41', name: 'Олег Миронов', stage: 'screening', status: 'active' },
+      { id: 'c42', name: 'Петр Сидоров', stage: 'interview', status: 'active', reportId: '1' },
+      { id: 'c43', name: 'Станислав Минаев', stage: 'offer', status: 'active', reportId: '1' },
+      { id: 'c44', name: 'Юрий Лебедев', stage: 'hired', status: 'archived', reportId: '1' },
+    ],
+  },
+  {
+    id: 'v5',
+    title: 'Data Analyst',
+    department: 'Analytics',
+    status: 'open',
+    createdAt: '2025-10-18',
+    updatedAt: '2025-10-28',
+    url: 'https://example.com/jobs/data-analyst',
+    candidates: [
+      { id: 'c50', name: 'Ольга Соколова', stage: 'interview', status: 'active', rating: 83, reportId: '5' },
+      { id: 'c51', name: 'Максим Архипов', stage: 'sourced', status: 'active' },
+      { id: 'c52', name: 'Захар Логинов', stage: 'screening', status: 'active' },
+      { id: 'c53', name: 'Владимир Крюков', stage: 'rejected', status: 'archived', reportId: '5' },
     ],
   }]);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
